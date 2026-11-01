@@ -99,14 +99,23 @@ nav {
 
 .hero {
   position: relative;
-  min-height: calc(100vh - 31px);
+  min-height: max(760px, calc(100vh - 31px));
   overflow: hidden;
-  display: grid;
-  place-items: center;
   background: var(--sky);
-  padding: 140px 24px 70px;
+  padding: 175px max(24px, 6vw) 72px;
 }
-.hero-copy { position: relative; z-index: 3; text-align: center; width: min(1180px, 100%); }
+.hero::after {
+  content: "";
+  position: absolute;
+  right: -11vw;
+  bottom: -26vw;
+  width: 62vw;
+  height: 62vw;
+  border: 1.5px solid rgba(5, 5, 5, .14);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero-copy { position: relative; z-index: 3; width: min(1320px, 100%); margin: 0 auto; text-align: left; }
 .hero-copy > * { animation: hero-rise .75s cubic-bezier(.2,.8,.2,1) both; }
 .hero-copy h1 { animation-delay: .08s; }
 .hero-copy .hero-subtitle { animation-delay: .16s; }
@@ -121,33 +130,39 @@ nav {
 }
 .hero h1 {
   position: relative;
+  width: min(720px, 57%);
   margin: 0;
   font-family: var(--font-display), Impact, sans-serif;
-  font-size: clamp(108px, 17.5vw, 274px);
+  font-size: clamp(104px, 11vw, 188px);
   font-weight: 400;
   letter-spacing: -.035em;
-  line-height: .73;
+  line-height: .75;
   text-transform: uppercase;
 }
-.hero h1 .hero-word { display: inline-block; }
+.hero h1 .hero-word { display: block; }
+.hero-rescue-line { display: flex; align-items: center; gap: .08em; }
+.hero-rescue-line .hero-word { flex: 0 1 auto; }
 .hero h1 .hero-amp {
   display: inline-grid;
   place-items: center;
-  width: .68em;
-  height: .68em;
-  margin: 0 .04em;
+  flex: 0 0 auto;
+  width: .64em;
+  height: .64em;
   border-radius: 50%;
   background: var(--sun);
   border: var(--border);
   font-family: var(--font-body), sans-serif;
-  font-size: .48em;
-  vertical-align: .22em;
+  font-size: .36em;
   transform: rotate(-8deg);
 }
-.hero-subtitle { max-width: 590px; margin: 34px auto 26px; font-size: clamp(18px, 2vw, 25px); line-height: 1.25; font-weight: 600; }
-.ribbon-scene { position: absolute; inset: 5% -8% auto; height: 70%; z-index: 1; pointer-events: none; }
+.hero-subtitle { max-width: 570px; margin: 34px 0 26px; font-size: clamp(18px, 1.7vw, 23px); line-height: 1.3; font-weight: 650; }
+.hero-proof { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 26px; }
+.hero-proof span { padding: 8px 11px; border: var(--border); border-radius: 999px; background: rgba(255,255,255,.72); font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .06em; }
+.hero-proof span::before { content: "✦"; margin-right: 6px; color: var(--violet); }
+.ribbon-scene { position: absolute; z-index: 1; top: 120px; right: 1.5%; width: 50%; height: calc(100% - 150px); pointer-events: none; }
 .ribbon-scene canvas { position: relative; z-index: 2; }
-.ribbon-fallback { position: absolute; inset: 20% 8%; border: 60px solid var(--blue); border-radius: 50%; transform: rotate(-9deg); opacity: .2; }
+.ribbon-fallback { position: absolute; inset: 18% 14%; display: grid; place-items: center; border: 44px solid var(--blue); border-radius: 50%; transform: rotate(-9deg); opacity: 0; }
+.ribbon-fallback span { width: 150px; aspect-ratio: 1; display: grid; place-items: center; border: var(--border); border-radius: 44% 56% 48% 52%; background: var(--ember); font-size: 24px; font-weight: 900; }
 .hero-sticker {
   position: absolute;
   z-index: 5;
@@ -157,16 +172,15 @@ nav {
   font-weight: 900;
   font-size: 12px;
 }
-.sticker-orange { left: 5%; top: 34%; background: var(--ember); color: var(--paper); transform: rotate(-12deg); }
-.sticker-yellow { right: 7%; bottom: 23%; background: var(--sun); transform: rotate(9deg); }
+.sticker-yellow { right: 4%; bottom: 20%; background: var(--sun); transform: rotate(9deg); }
 .hero-sticker { animation: sticker-wiggle 4s ease-in-out infinite alternate; }
 .sticker-yellow { animation-delay: -1.4s; }
 @keyframes sticker-wiggle { from { translate: 0 -4px; rotate: -2deg; } to { translate: 0 7px; rotate: 3deg; } }
 .speech-bubble {
   position: absolute;
   z-index: 7;
-  top: 18%;
-  right: 4%;
+  top: 22%;
+  right: 3%;
   max-width: 180px;
   padding: 13px 16px;
   border: var(--border);
@@ -495,10 +509,15 @@ footer a { font-weight: 800; }
 @media (max-width: 900px) {
   nav { grid-template-columns: 1fr 1fr; }
   .nav-pills { display: none; }
-  .hero { padding-top: 160px; }
-  .hero h1 { font-size: clamp(92px, 25vw, 180px); }
-  .hero h1 .hero-word { display: block; }
-  .hero h1 .hero-amp { display: none; }
+  .hero { min-height: 1040px; padding: 150px 24px 430px; }
+  .hero-copy { text-align: center; }
+  .hero h1 { width: 100%; font-size: clamp(92px, 22vw, 170px); }
+  .hero-rescue-line { justify-content: center; }
+  .hero-subtitle { margin-left: auto; margin-right: auto; }
+  .hero-proof { justify-content: center; }
+  .ribbon-scene { top: auto; right: 50%; bottom: 18px; width: min(680px, 110%); height: 410px; transform: translateX(50%); }
+  .speech-bubble { top: auto; right: 8%; bottom: 330px; }
+  .sticker-yellow { right: 8%; bottom: 90px; }
   .lab-grid, .results-grid, .panel-conclusion { grid-template-columns: 1fr; }
   .dropzone { min-height: 430px; }
   .results-grid { padding: 0 16px; }
@@ -512,20 +531,17 @@ footer a { font-weight: 800; }
   .judge-card-1, .judge-card-2, .judge-card-3 { transform: none; }
 }
 
-@media (min-width: 901px) {
-  .hero h1 { color: transparent; }
-  .hero h1 .hero-amp { background: transparent; border-color: transparent; color: transparent; }
-  .hero-copy > .eyebrow { visibility: hidden; }
-  .hero-subtitle { margin-top: 22px; }
-}
-
 @media (max-width: 560px) {
   .nav-cta { font-size: 0; gap: 0; padding: 13px; }
   .nav-cta::after { content: "Roast it"; font-size: 12px; }
-  .hero h1 { font-size: 29vw; line-height: .75; }
+  .hero { min-height: 900px; padding: 138px 16px 370px; }
+  .hero h1 { font-size: 24vw; line-height: .76; }
+  .hero h1 .hero-amp { font-size: .34em; }
+  .hero-subtitle { margin-top: 26px; font-size: 17px; }
+  .hero-proof span { font-size: 9px; }
+  .ribbon-scene { bottom: 8px; width: 118%; height: 340px; }
   .speech-bubble { display: none; }
-  .sticker-orange { top: 29%; }
-  .sticker-yellow { bottom: 17%; }
+  .sticker-yellow { right: 5%; bottom: 55px; }
   .controls-card { padding: 24px 18px; }
   .intensity-picker button { font-size: 11px; }
   .result-banner { min-height: 460px; }

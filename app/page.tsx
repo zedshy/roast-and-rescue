@@ -228,15 +228,16 @@ export default function Home() {
 
       <section className="hero" id="top">
         <RibbonScene />
-        <div className="hero-sticker sticker-orange">HONEST</div>
         <div className="hero-sticker sticker-yellow">5 SEC</div>
         <div className="speech-bubble">respectfully… what do you sell?</div>
         <div className="hero-copy">
           <p className="eyebrow">A FIVE-SECOND LANDING-PAGE TEST WITH TEETH</p>
           <h1 aria-label="Roast and Rescue">
             <span className="hero-word" aria-hidden="true">ROAST</span>
-            <span className="hero-amp" aria-hidden="true">&</span>
-            <span className="hero-word" aria-hidden="true">RESCUE</span>
+            <span className="hero-rescue-line" aria-hidden="true">
+              <span className="hero-amp">&</span>
+              <span className="hero-word">RESCUE</span>
+            </span>
           </h1>
           <p className="hero-subtitle">
             Find out what visitors actually understand—then rescue your hero copy before they
@@ -245,6 +246,11 @@ export default function Home() {
           <a className="primary-button" href="#roast">
             Enter the roast lab <span aria-hidden="true">↓</span>
           </a>
+          <div className="hero-proof" aria-label="Product highlights">
+            <span>3 opinionated judges</span>
+            <span>1 useful rescue</span>
+            <span>No account</span>
+          </div>
         </div>
       </section>
 
