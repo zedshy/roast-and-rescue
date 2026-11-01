@@ -58,18 +58,14 @@ nav {
   padding: 20px 3vw;
 }
 .brand {
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
-  border: var(--border);
-  border-radius: 50%;
-  background: var(--paper);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-display), sans-serif;
-  font-size: 20px;
-  line-height: 1;
 }
-.brand span { color: var(--ember); }
+.logo-mark { width: 54px; height: 54px; display: block; flex: 0 0 auto; overflow: visible; }
+.brand-name { max-width: 92px; font-size: 19px; font-weight: 400; letter-spacing: -.01em; line-height: .78; text-transform: uppercase; }
+.brand-name em { color: var(--ember); font-style: normal; }
 .nav-pills { display: flex; gap: 5px; }
 .nav-pills a {
   background: var(--paper);
@@ -600,7 +596,8 @@ nav {
 .how-section article h3 { margin: auto 0 4px; font-size: 30px; }
 .how-section article p { margin: 0; line-height: 1.45; }
 footer { display: flex; align-items: center; gap: 22px; padding: 34px 4vw; background: var(--carbon); color: var(--paper); font-size: 12px; }
-.footer-brand { flex: 0 0 auto; color: var(--carbon); }
+.footer-brand { flex: 0 0 auto; }
+.footer-brand .brand-name { color: var(--paper); }
 footer p { margin-right: auto; }
 footer a { font-weight: 800; }
 
@@ -634,7 +631,8 @@ footer a { font-weight: 800; }
 @media (max-width: 560px) {
   .marquee { font-size: 9px; padding: 7px 0; }
   nav { top: 37px; padding: 14px 16px; }
-  .brand { width: 46px; height: 46px; font-size: 17px; }
+  .logo-mark { width: 46px; height: 46px; }
+  nav .brand-name { display: none; }
   .nav-cta { font-size: 0; gap: 0; padding: 13px; }
   .nav-cta::after { content: "Roast it"; font-size: 12px; }
   .hero { min-height: 760px; padding: 116px 16px 58px; }

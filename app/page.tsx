@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Intensity, RoastReport } from "@/lib/report";
+import { LogoMark } from "@/components/LogoMark";
 
 const MascotScene = dynamic(
   () => import("@/components/MascotScene").then((module) => module.MascotScene),
@@ -211,7 +212,8 @@ export default function Home() {
 
       <nav>
         <a className="brand" href="#top" aria-label="Roast and Rescue home">
-          R<span>&</span>R
+          <LogoMark />
+          <span className="brand-name">Roast <em>&amp;</em> Rescue</span>
         </a>
         <div className="nav-pills">
           <a href="#roast">The lab</a>
@@ -566,7 +568,7 @@ export default function Home() {
       </section>
 
       <footer>
-        <div className="brand footer-brand">R<span>&</span>R</div>
+        <div className="brand footer-brand"><LogoMark /><span className="brand-name">Roast <em>&amp;</em> Rescue</span></div>
         <p>Built at DevDay Exchange London with Codex and the OpenAI API.</p>
         <a href="https://github.com/zedshy/roast-and-rescue">GitHub ↗</a>
       </footer>
