@@ -3,7 +3,7 @@ import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/server-guardrails";
-import { assertPublicHostname, normalizeWebsiteUrl } from "@/lib/url-safety";
+import { assertPublicHostname, normalizeWebsiteUrl, UnsafeUrlError } from "@/lib/url-safety";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
             await pageRequest.continue();
             return;
           }
-          if (!['http:', 'https:'].includes(resource.protocol)) {
+          if (!["http:", "https:"].includes(resource.protocol)) {
             await pageRequest.abort("blockedbyclient");
             return;
           }
@@ -115,7 +115,7 @@ export async function POST(request: Request) {
         { status: 503 },
       );
     }
-    if (/public|private|hostname|http|credentials|URL|too long/i.test(message)) {
+    if (error instanceof UnsafeUrlError) {
       return NextResponse.json({ error: message, code: "UNSAFE_URL" }, { status: 400 });
     }
     console.error("Website capture failed", error);

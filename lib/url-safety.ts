@@ -3,6 +3,13 @@ import { isIP } from "node:net";
 
 const blockedHostSuffixes = [".localhost", ".local", ".internal", ".home", ".lan"];
 
+export class UnsafeUrlError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnsafeUrlError";
+  }
+}
+
 function isPrivateIpv4(address: string) {
   const parts = address.split(".").map(Number);
   if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return true;
@@ -44,9 +51,9 @@ export function isPrivateAddress(address: string) {
 export function normalizeWebsiteUrl(value: string) {
   const candidate = /^https?:\/\//i.test(value.trim()) ? value.trim() : `https://${value.trim()}`;
   const url = new URL(candidate);
-  if (!['http:', 'https:'].includes(url.protocol)) throw new Error("Use a public http:// or https:// website.");
-  if (url.username || url.password) throw new Error("Website URLs cannot contain credentials.");
-  if (url.href.length > 2048) throw new Error("That website URL is too long.");
+  if (!["http:", "https:"].includes(url.protocol)) throw new UnsafeUrlError("Use a public http:// or https:// website.");
+  if (url.username || url.password) throw new UnsafeUrlError("Website URLs cannot contain credentials.");
+  if (url.href.length > 2048) throw new UnsafeUrlError("That website URL is too long.");
   url.hash = "";
   return url;
 }
@@ -58,14 +65,19 @@ export async function assertPublicHostname(hostname: string) {
     host === "metadata.google.internal" ||
     blockedHostSuffixes.some((suffix) => host.endsWith(suffix))
   ) {
-    throw new Error("Only public websites can be captured.");
+    throw new UnsafeUrlError("Only public websites can be captured.");
   }
   if (isIP(host)) {
-    if (isPrivateAddress(host)) throw new Error("Private network addresses cannot be captured.");
+    if (isPrivateAddress(host)) throw new UnsafeUrlError("Private network addresses cannot be captured.");
     return;
   }
-  const addresses = await lookup(host, { all: true, verbatim: true });
+  let addresses;
+  try {
+    addresses = await lookup(host, { all: true, verbatim: true });
+  } catch {
+    throw new UnsafeUrlError("That hostname could not be resolved.");
+  }
   if (!addresses.length || addresses.some(({ address }) => isPrivateAddress(address))) {
-    throw new Error("That hostname does not resolve to a public website.");
+    throw new UnsafeUrlError("That hostname does not resolve to a public website.");
   }
 }
