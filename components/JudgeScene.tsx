@@ -100,7 +100,7 @@ export function JudgeScene() {
         <span>Click Detective</span>
       </div>
       <div className="judge-scene-fallback">
-        <span>ಠ_ಠ</span><span>¬‿¬</span><span>◉‿◉</span>
+        <span>😴</span><span>🤓</span><span>🕵🏽</span>
       </div>
     </div>
   );

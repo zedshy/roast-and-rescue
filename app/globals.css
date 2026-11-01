@@ -381,9 +381,9 @@ nav {
   display: grid;
   place-items: center;
   border: var(--border);
-  border-radius: 44% 56% 48% 52%;
+  border-radius: 26px;
   background: var(--ember);
-  font-weight: 900;
+  font-size: 42px;
 }
 .judge-scene-fallback span:nth-child(2) { background: var(--violet); color: var(--paper); }
 .judge-scene-fallback span:nth-child(3) { background: var(--mint); }
@@ -614,7 +614,7 @@ footer a { font-weight: 800; }
   .judge-opinions { gap: 10px; }
   .judge-card { min-height: 270px; padding: 22px; }
   .judge-card > strong { left: 24px; right: 24px; bottom: 24px; }
-  .judge-scene-fallback span { width: 88px; font-size: 12px; }
+  .judge-scene-fallback span { width: 88px; font-size: 30px; }
   .panel-conclusion { margin-top: 20px; gap: 10px; }
   .consensus-card, .example-card { border-radius: 22px; padding: 24px 20px; }
   .results-grid { margin-top: 42px; gap: 12px; }
