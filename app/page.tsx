@@ -5,12 +5,8 @@ import Image from "next/image";
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Intensity, RoastReport } from "@/lib/report";
 import { LogoMark } from "@/components/LogoMark";
-import { downloadAuditImage, downloadAuditPdf } from "@/lib/audit-export";
+import { buildAuditImage, buildAuditPdf } from "@/lib/audit-export";
 
-const MascotScene = dynamic(
-  () => import("@/components/MascotScene").then((module) => module.MascotScene),
-  { ssr: false },
-);
 const JudgeScene = dynamic(
   () => import("@/components/JudgeScene").then((module) => module.JudgeScene),
   { ssr: false },
@@ -20,6 +16,12 @@ type Intent = {
   product: string;
   audience: string;
   action: string;
+};
+
+type ExportedAudit = {
+  format: "image" | "pdf";
+  filename: string;
+  url: string;
 };
 
 const DEMO_INTENT: Intent = {
@@ -179,6 +181,7 @@ export default function Home() {
   const labRef = useRef<HTMLElement>(null);
   const loadingRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLElement>(null);
+  const exportUrlRef = useRef<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
@@ -195,6 +198,7 @@ export default function Home() {
   const [imageGenerationError, setImageGenerationError] = useState("");
   const [exportingAudit, setExportingAudit] = useState<"" | "image" | "pdf">("");
   const [auditExportError, setAuditExportError] = useState("");
+  const [exportedAudit, setExportedAudit] = useState<ExportedAudit | null>(null);
 
   const canSubmit = Boolean(image && intent.product && intent.audience && intent.action);
   const rewriteCopy = useMemo(() => {
@@ -223,12 +227,24 @@ export default function Home() {
     return () => cancelAnimationFrame(frame);
   }, [loading]);
 
+  useEffect(() => () => {
+    if (exportUrlRef.current) URL.revokeObjectURL(exportUrlRef.current);
+  }, []);
+
+  function clearExportedAudit() {
+    if (exportUrlRef.current) URL.revokeObjectURL(exportUrlRef.current);
+    exportUrlRef.current = null;
+    setExportedAudit(null);
+    setAuditExportError("");
+  }
+
   async function prepareFile(file: File) {
     setError("");
     setCaptureError("");
     setReport(null);
     setRescueImage(null);
     setImageGenerationError("");
+    clearExportedAudit();
     try {
       setImage(await compressImage(file));
       setFileName(file.name || "Pasted screenshot");
@@ -262,6 +278,7 @@ export default function Home() {
     setReport(null);
     setRescueImage(null);
     setImageGenerationError("");
+    clearExportedAudit();
     try {
       const response = await fetch("/api/screenshot", {
         method: "POST",
@@ -291,6 +308,7 @@ export default function Home() {
     setLoading(true);
     setError("");
     setReport(null);
+    clearExportedAudit();
     const activeIntent = demo ? DEMO_INTENT : intent;
     if (demo) {
       setIntent(DEMO_INTENT);
@@ -355,30 +373,26 @@ export default function Home() {
     }
   }
 
-  async function downloadShareCard() {
-    if (!report) return;
-    try {
-      const blob = await createShareCard(report);
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = "roast-and-rescue-verdict.png";
-      anchor.click();
-      URL.revokeObjectURL(url);
-      setCopied("card");
-      window.setTimeout(() => setCopied(""), 1800);
-    } catch {
-      setError("This browser could not save the verdict card.");
-    }
-  }
-
   async function exportAudit(format: "image" | "pdf") {
     if (!report || exportingAudit) return;
     setExportingAudit(format);
     setAuditExportError("");
     try {
-      if (format === "image") await downloadAuditImage(report);
-      else await downloadAuditPdf(report);
+      const blob = format === "image" ? await buildAuditImage(report) : await buildAuditPdf(report);
+      if (exportUrlRef.current) URL.revokeObjectURL(exportUrlRef.current);
+      const url = URL.createObjectURL(blob);
+      const filename = `roast-and-rescue-audit.${format === "image" ? "png" : "pdf"}`;
+      exportUrlRef.current = url;
+      setExportedAudit({ format, filename, url });
+
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.rel = "noopener";
+      anchor.hidden = true;
+      document.body.appendChild(anchor);
+      anchor.click();
+      window.setTimeout(() => anchor.remove(), 0);
     } catch (cause) {
       setAuditExportError(
         cause instanceof Error ? cause.message : "This browser could not export the full audit.",
@@ -430,7 +444,7 @@ export default function Home() {
     setRescueImage(null);
     setImageGenerationError("");
     setExportingAudit("");
-    setAuditExportError("");
+    clearExportedAudit();
     if (fileInput.current) fileInput.current.value = "";
     requestAnimationFrame(() => labRef.current?.scrollIntoView({ behavior: "smooth" }));
   }
@@ -669,51 +683,71 @@ export default function Home() {
 
       {report && (
         <section className="results-section" ref={resultsRef} aria-live="polite">
-          <div className="result-banner">
-            <div className="result-memes" aria-hidden="true">
-              <span>IT’S GIVING: MYSTERY</span>
-              <span>THE HERO NEEDS A HERO</span>
+          <nav className="audit-story" aria-label="Your audit journey">
+            <a href="#verdict"><span>01</span><strong>Verdict</strong><small>What landed</small></a>
+            <a href="#diagnosis"><span>02</span><strong>Diagnosis</strong><small>What got lost</small></a>
+            <a href="#rescue"><span>03</span><strong>Rescue</strong><small>What to ship</small></a>
+          </nav>
+
+          <div className="result-banner" id="verdict">
+            <div className="result-banner-inner">
+              <p className="eyebrow">01 · THE FIVE-SECOND VERDICT</p>
+              <h2>What landed at first glance</h2>
+              <blockquote>“{report.roast}”</blockquote>
+              <div className="verdict-actions">
+                <button
+                  className="result-copy-button"
+                  type="button"
+                  onClick={() => void handleCopy("roast", report.roast)}
+                >
+                  {copied === "roast" ? "Copied roast!" : "Copy roast"}
+                </button>
+                <button className="result-copy-button secondary" type="button" onClick={() => void handleShare()}>
+                  {copied === "share" ? "Shared / copied!" : "Share verdict ↗"}
+                </button>
+              </div>
+
+              <div className="audit-download-panel">
+                <div>
+                  <strong>Take the full audit with you</strong>
+                  <span>Both formats include every judge, priority, score and rewritten hero.</span>
+                </div>
+                <div className="audit-download-buttons">
+                  <button
+                    type="button"
+                    disabled={Boolean(exportingAudit)}
+                    onClick={() => void exportAudit("image")}
+                  >
+                    {exportingAudit === "image" ? "Building PNG…" : "Create PNG"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={Boolean(exportingAudit)}
+                    onClick={() => void exportAudit("pdf")}
+                  >
+                    {exportingAudit === "pdf" ? "Building PDF…" : "Create PDF"}
+                  </button>
+                </div>
+              </div>
+              {exportedAudit && (
+                <div className="export-ready" role="status">
+                  <div>
+                    <strong>{exportedAudit.format === "pdf" ? "PDF" : "PNG"} ready</strong>
+                    <span>If the automatic save was blocked, use one of these direct links.</span>
+                  </div>
+                  <a href={exportedAudit.url} download={exportedAudit.filename}>Save file ↓</a>
+                  <a href={exportedAudit.url} target="_blank" rel="noopener noreferrer">Open preview ↗</a>
+                </div>
+              )}
+              {auditExportError && <p className="export-error" role="alert">{auditExportError}</p>}
             </div>
-            <p className="eyebrow">THE FIVE-SECOND VERDICT</p>
-            <blockquote>“{report.roast}”</blockquote>
-            <button
-              className="result-copy-button"
-              type="button"
-              onClick={() => void handleCopy("roast", report.roast)}
-            >
-              {copied === "roast" ? "Copied roast!" : "Copy the roast"}
-            </button>
-            <div className="share-actions">
-              <button type="button" onClick={() => void handleShare()}>
-                {copied === "share" ? "Shared / copied!" : "Share verdict ↗"}
-              </button>
-              <button type="button" onClick={() => void downloadShareCard()}>
-                {copied === "card" ? "Card saved!" : "Save share card ↓"}
-              </button>
-              <button
-                type="button"
-                disabled={Boolean(exportingAudit)}
-                onClick={() => void exportAudit("image")}
-              >
-                {exportingAudit === "image" ? "Building image…" : "Full audit PNG ↓"}
-              </button>
-              <button
-                type="button"
-                disabled={Boolean(exportingAudit)}
-                onClick={() => void exportAudit("pdf")}
-              >
-                {exportingAudit === "pdf" ? "Building PDF…" : "Full audit PDF ↓"}
-              </button>
-            </div>
-            {auditExportError && <p className="export-error" role="alert">{auditExportError}</p>}
-            <span className="roast-stamp">ROASTED</span>
           </div>
 
           <section className="judge-panel" aria-labelledby="judge-panel-title">
             <div className="judge-heading">
-              <p className="eyebrow">THE PANEL HAS ENTERED THE CHAT</p>
-              <h2 id="judge-panel-title">Meet your judges.</h2>
-              <p>They do not agree on everything. That is the useful part.</p>
+              <p className="eyebrow">THREE LENSES, ONE VERDICT</p>
+              <h2 id="judge-panel-title">Why the page reads this way</h2>
+              <p>Tap a judge to hear their angle, then read the evidence below.</p>
             </div>
 
             <JudgeScene />
@@ -755,6 +789,15 @@ export default function Home() {
             </div>
           </section>
 
+          <div className="audit-phase-heading" id="diagnosis">
+            <span>02</span>
+            <div>
+              <p className="eyebrow">DIAGNOSIS</p>
+              <h2>What visitors see versus what you meant.</h2>
+              <p>The blind read exposes the gap before the rescue starts.</p>
+            </div>
+          </div>
+
           <div className="results-grid">
             <article className="visitor-card">
               <div className="card-heading">
@@ -791,17 +834,13 @@ export default function Home() {
             </div>
           </article>
 
-          <div className="rescue-mascot-band">
-            <MascotScene mode="rescue" />
+          <div className="audit-phase-heading rescue-phase" id="rescue">
+            <span>03</span>
             <div>
-              <span className="eyebrow">THE CRITIC HAS LOGGED OFF</span>
-              <strong>Your hero survived character development.</strong>
+              <p className="eyebrow">RESCUE</p>
+              <h2>Three fixes and a hero ready to test.</h2>
+              <p>Keep what already works, make these changes in order, then test the rewrite.</p>
             </div>
-          </div>
-
-          <div className="rescue-heading">
-            <p className="eyebrow">NOW FOR THE USEFUL BIT</p>
-            <h2>Rescue mode.</h2>
           </div>
 
           <div className="keep-card">

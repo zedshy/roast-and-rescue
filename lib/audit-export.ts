@@ -294,24 +294,14 @@ export function createAuditCanvas(report: RoastReport) {
   return canvas;
 }
 
-function triggerDownload(url: string, filename: string) {
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-}
-
-export async function downloadAuditImage(report: RoastReport) {
+export async function buildAuditImage(report: RoastReport) {
   const canvas = createAuditCanvas(report);
-  const blob = await new Promise<Blob>((resolve, reject) => {
+  return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((output) => (output ? resolve(output) : reject(new Error("Audit image failed."))), "image/png");
   });
-  const url = URL.createObjectURL(blob);
-  triggerDownload(url, "roast-and-rescue-audit.png");
-  window.setTimeout(() => URL.revokeObjectURL(url), 2_000);
 }
 
-export async function downloadAuditPdf(report: RoastReport) {
+export async function buildAuditPdf(report: RoastReport) {
   const canvas = createAuditCanvas(report);
   const { jsPDF } = await import("jspdf");
   const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4", compress: true });
@@ -340,5 +330,5 @@ export async function downloadAuditPdf(report: RoastReport) {
     sourceY += sliceHeight;
     pageIndex += 1;
   }
-  pdf.save("roast-and-rescue-audit.pdf");
+  return pdf.output("blob");
 }
