@@ -37,6 +37,101 @@ function copyText(text: string) {
   return navigator.clipboard.writeText(text);
 }
 
+function verdictText(report: RoastReport) {
+  return [
+    "My landing page just faced the Roast & Rescue panel 🔥",
+    `“${report.roast}”`,
+    "",
+    ...report.judges.map((judge) => `${judge.name}: ${judge.verdict}`),
+    "",
+    "The rescue:",
+    ...report.consensus.map((point) => `• ${point}`),
+  ].join("\n");
+}
+
+function wrapCanvasText(
+  context: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxLines: number,
+) {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let line = "";
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (context.measureText(candidate).width <= maxWidth) {
+      line = candidate;
+      continue;
+    }
+    if (line) lines.push(line);
+    line = word;
+    if (lines.length === maxLines - 1) break;
+  }
+  if (line && lines.length < maxLines) lines.push(line);
+  if (words.length && lines.join(" ").length < text.length) {
+    lines[lines.length - 1] = `${lines[lines.length - 1].replace(/[.,;:!?]?$/, "")}…`;
+  }
+  return lines;
+}
+
+async function createShareCard(report: RoastReport): Promise<Blob> {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200;
+  canvas.height = 630;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("This browser could not make a share card.");
+
+  context.fillStyle = "#dceeff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = "#6d42ff";
+  context.beginPath();
+  context.arc(1085, 60, 230, 0, Math.PI * 2);
+  context.fill();
+  context.fillStyle = "#ff5a1f";
+  context.beginPath();
+  context.arc(65, 595, 170, 0, Math.PI * 2);
+  context.fill();
+
+  context.fillStyle = "#0b0b0b";
+  context.font = "900 24px Arial, sans-serif";
+  context.fillText("ROAST & RESCUE", 64, 70);
+  context.fillStyle = "#ff5a1f";
+  context.font = "900 18px Arial, sans-serif";
+  context.fillText("THE FIVE-SECOND VERDICT", 64, 122);
+  context.fillStyle = "#0b0b0b";
+  context.font = "900 48px Arial, sans-serif";
+  const roastLines = wrapCanvasText(context, `“${report.roast}”`, 980, 4);
+  roastLines.forEach((line, index) => context.fillText(line, 64, 188 + index * 58));
+
+  const cardY = 440;
+  report.judges.slice(0, 3).forEach((judge, index) => {
+    const x = 64 + index * 360;
+    context.fillStyle = index === 0 ? "#ffdfd0" : index === 1 ? "#e8dcff" : "#cef6df";
+    context.strokeStyle = "#0b0b0b";
+    context.lineWidth = 3;
+    context.beginPath();
+    context.roundRect(x, cardY, 330, 116, 18);
+    context.fill();
+    context.stroke();
+    context.fillStyle = "#0b0b0b";
+    context.font = "900 13px Arial, sans-serif";
+    context.fillText(judge.name.toUpperCase(), x + 18, cardY + 29);
+    context.font = "700 18px Arial, sans-serif";
+    wrapCanvasText(context, judge.verdict, 292, 3).forEach((line, lineIndex) =>
+      context.fillText(line, x + 18, cardY + 60 + lineIndex * 23),
+    );
+  });
+
+  context.fillStyle = "#0b0b0b";
+  context.font = "700 15px Arial, sans-serif";
+  context.fillText("roast-and-rescue · Built at DevDay Exchange London", 64, 603);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Share card failed."))), "image/png");
+  });
+}
+
 async function compressImage(file: File): Promise<string> {
   if (!file.type.match(/^image\/(png|jpeg|jpg|webp)$/)) {
     throw new Error("Please choose a PNG, JPEG, or WebP image.");
@@ -55,7 +150,13 @@ async function compressImage(file: File): Promise<string> {
   if (!context) throw new Error("This browser could not prepare the screenshot.");
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
-  return canvas.toDataURL("image/jpeg", 0.86);
+  let encoded = canvas.toDataURL("image/jpeg", 0.84);
+  if (encoded.length > 3_700_000) encoded = canvas.toDataURL("image/jpeg", 0.68);
+  if (encoded.length > 3_700_000) encoded = canvas.toDataURL("image/jpeg", 0.52);
+  if (encoded.length > 4_000_000) {
+    throw new Error("This screenshot is still too large after compression. Try a smaller crop.");
+  }
+  return encoded;
 }
 
 function Score({ label, value }: { label: string; value: number }) {
@@ -85,6 +186,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
+  const [rescueImage, setRescueImage] = useState<string | null>(null);
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [imageGenerationError, setImageGenerationError] = useState("");
 
   const canSubmit = Boolean(image && intent.product && intent.audience && intent.action);
   const rewriteCopy = useMemo(() => {
@@ -116,6 +220,8 @@ export default function Home() {
   async function prepareFile(file: File) {
     setError("");
     setReport(null);
+    setRescueImage(null);
+    setImageGenerationError("");
     try {
       setImage(await compressImage(file));
       setFileName(file.name || "Pasted screenshot");
@@ -189,6 +295,74 @@ export default function Home() {
     }
   }
 
+  async function handleShare() {
+    if (!report) return;
+    try {
+      const text = verdictText(report);
+      const shareUrl = window.location.origin;
+      const blob = await createShareCard(report);
+      const file = new File([blob], "roast-and-rescue-verdict.png", { type: "image/png" });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ title: "My Roast & Rescue verdict", text, url: shareUrl, files: [file] });
+      } else if (navigator.share) {
+        await navigator.share({ title: "My Roast & Rescue verdict", text, url: shareUrl });
+      } else {
+        await copyText(`${text}\n\n${shareUrl}`);
+      }
+      setCopied("share");
+      window.setTimeout(() => setCopied(""), 1800);
+    } catch (cause) {
+      if (cause instanceof DOMException && cause.name === "AbortError") return;
+      setError("Sharing was blocked. Save the verdict card instead.");
+    }
+  }
+
+  async function downloadShareCard() {
+    if (!report) return;
+    try {
+      const blob = await createShareCard(report);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "roast-and-rescue-verdict.png";
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setCopied("card");
+      window.setTimeout(() => setCopied(""), 1800);
+    } catch {
+      setError("This browser could not save the verdict card.");
+    }
+  }
+
+  async function generateRescueImage() {
+    if (!report || !image || generatingImage) return;
+    setGeneratingImage(true);
+    setImageGenerationError("");
+    try {
+      const demo = image === "/sample-landing.svg";
+      const response = await fetch("/api/rescue-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          demo,
+          image: demo ? undefined : image,
+          report: {
+            roast: report.roast,
+            consensus: report.consensus,
+            rewrite: report.rewrite,
+          },
+        }),
+      });
+      const payload = (await response.json()) as { image?: string; error?: string };
+      if (!response.ok || !payload.image) throw new Error(payload.error || "No concept was generated.");
+      setRescueImage(payload.image);
+    } catch (cause) {
+      setImageGenerationError(cause instanceof Error ? cause.message : "The visual rescue did not finish.");
+    } finally {
+      setGeneratingImage(false);
+    }
+  }
+
   function startOver() {
     setImage(null);
     setFileName("");
@@ -197,6 +371,8 @@ export default function Home() {
     setReport(null);
     setError("");
     setCopied("");
+    setRescueImage(null);
+    setImageGenerationError("");
     if (fileInput.current) fileInput.current.value = "";
     requestAnimationFrame(() => labRef.current?.scrollIntoView({ behavior: "smooth" }));
   }
@@ -420,6 +596,14 @@ export default function Home() {
             >
               {copied === "roast" ? "Copied roast!" : "Copy the roast"}
             </button>
+            <div className="share-actions">
+              <button type="button" onClick={() => void handleShare()}>
+                {copied === "share" ? "Shared / copied!" : "Share verdict ↗"}
+              </button>
+              <button type="button" onClick={() => void downloadShareCard()}>
+                {copied === "card" ? "Card saved!" : "Save share card ↓"}
+              </button>
+            </div>
             <span className="roast-stamp">ROASTED</span>
           </div>
 
@@ -548,6 +732,42 @@ export default function Home() {
               <h3>{report.rewrite.headline}</h3>
               <span>{report.rewrite.subheading}</span>
               <button type="button">{report.rewrite.cta}</button>
+            </div>
+          </article>
+
+          <article className="visual-rescue-card">
+            <div className="visual-rescue-copy">
+              <div>
+                <p className="eyebrow">OPTIONAL AI CONCEPT</p>
+                <h3>See the critique become a direction.</h3>
+              </div>
+              <p>
+                Generate one illustrative hero redesign using the rescued copy and priority fixes.
+                Review every word, accessibility choice and claim before using it.
+              </p>
+              <button type="button" onClick={() => void generateRescueImage()} disabled={generatingImage}>
+                {generatingImage ? "Designing the rescue…" : rescueImage ? "Generate another concept" : "Generate visual rescue ✦"}
+              </button>
+              <small>Avoid screenshots containing secrets or personal/customer data.</small>
+              {imageGenerationError && <p className="error-message" role="alert">{imageGenerationError}</p>}
+            </div>
+            <div className={`visual-rescue-preview ${rescueImage ? "has-concept" : ""}`}>
+              {rescueImage ? (
+                <>
+                  <Image
+                    src={rescueImage}
+                    alt="AI-generated illustrative landing-page hero concept"
+                    width={1536}
+                    height={1024}
+                    unoptimized
+                  />
+                  <a href={rescueImage} download="roast-and-rescue-concept.jpg">Download concept ↓</a>
+                </>
+              ) : (
+                <div aria-hidden="true">
+                  <span>BEFORE</span><span>→</span><strong>AFTER?</strong>
+                </div>
+              )}
             </div>
           </article>
 
