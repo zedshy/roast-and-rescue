@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     ].join("\n");
 
     const response = await client.responses.create({
-      model: process.env.OPENAI_MODEL || "gpt-6-astra",
+      model: process.env.OPENAI_MODEL || "gpt-5.4-nano",
       store: false,
       safety_identifier: safetyIdentifier(request),
       input: [
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
           type: "image_generation",
           model: process.env.OPENAI_IMAGE_MODEL || "gpt-image-2.5-flare",
           size: "1536x1024",
-          quality: "medium",
+          quality: "low",
           output_format: "jpeg",
           output_compression: 70,
         },

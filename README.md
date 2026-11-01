@@ -35,12 +35,14 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```bash
 OPENAI_API_KEY=your_api_key_here
-OPENAI_MODEL=gpt-6-astra
+OPENAI_MODEL=gpt-5.4-nano
 OPENAI_IMAGE_MODEL=gpt-image-2.5-flare
 SAFETY_IDENTIFIER_SALT=replace_with_a_random_secret
 ```
 
 The API key is only read by the server route and must never be exposed through a `NEXT_PUBLIC_` variable.
+
+The defaults are deliberately cost-conscious: `gpt-5.4-nano` handles screenshot critique and image-tool orchestration, critique responses are capped at 2,400 output tokens, and generated concepts use low quality. Image generation is never automatic; it only runs after the user presses **Generate visual rescue**. You can override either model through the environment variables above.
 
 ## Deploy to Vercel
 
