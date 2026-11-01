@@ -13,6 +13,10 @@ const MascotScene = dynamic(
   () => import("@/components/MascotScene").then((module) => module.MascotScene),
   { ssr: false },
 );
+const JudgeScene = dynamic(
+  () => import("@/components/JudgeScene").then((module) => module.JudgeScene),
+  { ssr: false },
+);
 
 type Intent = {
   product: string;
@@ -386,14 +390,14 @@ export default function Home() {
 
       {loading && (
         <section className="loading-section" ref={loadingRef} aria-live="polite" aria-busy="true">
-          <MascotScene mode="loading" />
+          <JudgeScene />
           <div className="loading-stickers" aria-hidden="true">
-            <span>LOOKING FOR NOUNS</span>
-            <span>SIDE-EYEING THE CTA</span>
-            <span>CHECKING IF “AI-POWERED” MEANS ANYTHING</span>
+            <span>THE VISITOR IS SQUINTING</span>
+            <span>THE GREMLIN WANTS NOUNS</span>
+            <span>THE DETECTIVE FOUND THE CTA</span>
           </div>
-          <h2>Reading it like a distracted visitor…</h2>
-          <p>Checking the promise, audience, hierarchy and next action.</p>
+          <h2>Calling the judges…</h2>
+          <p>Three tiny experts. Three completely different kinds of side-eye.</p>
         </section>
       )}
 
@@ -415,6 +419,52 @@ export default function Home() {
             </button>
             <span className="roast-stamp">ROASTED</span>
           </div>
+
+          <section className="judge-panel" aria-labelledby="judge-panel-title">
+            <div className="judge-heading">
+              <p className="eyebrow">THE PANEL HAS ENTERED THE CHAT</p>
+              <h2 id="judge-panel-title">Meet your judges.</h2>
+              <p>They do not agree on everything. That is the useful part.</p>
+            </div>
+
+            <JudgeScene />
+
+            <div className="judge-opinions">
+              {report.judges.map((judge, index) => (
+                <article className={`judge-card judge-card-${index + 1}`} key={judge.name}>
+                  <div className="judge-number">0{index + 1}</div>
+                  <p className="eyebrow">{judge.lens}</p>
+                  <h3>{judge.name}</h3>
+                  <blockquote>“{judge.opinion}”</blockquote>
+                  <strong>{judge.verdict}</strong>
+                </article>
+              ))}
+            </div>
+
+            <div className="panel-conclusion">
+              <article className="consensus-card">
+                <p className="eyebrow">THE UNANIMOUS VERDICT</p>
+                <h3>Do these three things first.</h3>
+                <ul>
+                  {report.consensus.map((point) => <li key={point}>{point}</li>)}
+                </ul>
+              </article>
+
+              <article className="example-card">
+                <p className="eyebrow">SHOW, DON’T TELL</p>
+                <div className="example-line example-before">
+                  <span>BEFORE</span>
+                  <strong>{report.example.before}</strong>
+                </div>
+                <div className="example-arrow" aria-hidden="true">↓</div>
+                <div className="example-line example-after">
+                  <span>AFTER</span>
+                  <strong>{report.example.after}</strong>
+                </div>
+                <p>{report.example.why}</p>
+              </article>
+            </div>
+          </section>
 
           <div className="results-grid">
             <article className="visitor-card">

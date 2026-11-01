@@ -2,6 +2,18 @@ export type Intensity = "gentle" | "spicy" | "brutal";
 
 export type RoastReport = {
   roast: string;
+  judges: Array<{
+    name: string;
+    lens: string;
+    opinion: string;
+    verdict: string;
+  }>;
+  consensus: string[];
+  example: {
+    before: string;
+    after: string;
+    why: string;
+  };
   visitorRead: {
     product: string;
     audience: string;
@@ -32,6 +44,39 @@ export type RoastReport = {
 export const SAMPLE_REPORT: RoastReport = {
   roast:
     "This hero has the confidence of a billion-pound platform and the explanatory power of a billboard glimpsed from a moving train.",
+  judges: [
+    {
+      name: "The Distracted Visitor",
+      lens: "First impression",
+      opinion:
+        "I can tell this is analytics, but I cannot tell what it analyses before my imaginary train reaches the next station.",
+      verdict: "Category clear. Value fuzzy.",
+    },
+    {
+      name: "The Copy Gremlin",
+      lens: "Clarity and specificity",
+      opinion:
+        "“Unlock insights” and “drive outcomes” are doing competitive corporate-jargon gymnastics. Give me one expensive problem and one recognisable customer.",
+      verdict: "Too many clouds, not enough nouns.",
+    },
+    {
+      name: "The Click Detective",
+      lens: "CTA and next action",
+      opinion:
+        "“Start now” asks for commitment before explaining the reward. A safer, concrete first step would earn more curiosity.",
+      verdict: "The button needs a promise.",
+    },
+  ],
+  consensus: [
+    "Name the checkout problem in the first line.",
+    "Say explicitly that the product is for independent online shops.",
+    "Make the CTA describe the useful first step, not the signup mechanism.",
+  ],
+  example: {
+    before: "Unlock insights. Drive outcomes.",
+    after: "Find the checkout problems costing you sales.",
+    why: "The revision names the problem, implies a financial benefit, and gives the right customer a reason to keep reading.",
+  },
   visitorRead: {
     product: "An AI analytics product for online businesses",
     audience: "Probably enterprise product or engineering teams",
@@ -77,6 +122,9 @@ export const REPORT_SCHEMA = {
   additionalProperties: false,
   required: [
     "roast",
+    "judges",
+    "consensus",
+    "example",
     "visitorRead",
     "intentGap",
     "keep",
@@ -86,6 +134,38 @@ export const REPORT_SCHEMA = {
   ],
   properties: {
     roast: { type: "string" },
+    judges: {
+      type: "array",
+      minItems: 3,
+      maxItems: 3,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["name", "lens", "opinion", "verdict"],
+        properties: {
+          name: { type: "string" },
+          lens: { type: "string" },
+          opinion: { type: "string" },
+          verdict: { type: "string" },
+        },
+      },
+    },
+    consensus: {
+      type: "array",
+      minItems: 3,
+      maxItems: 3,
+      items: { type: "string" },
+    },
+    example: {
+      type: "object",
+      additionalProperties: false,
+      required: ["before", "after", "why"],
+      properties: {
+        before: { type: "string" },
+        after: { type: "string" },
+        why: { type: "string" },
+      },
+    },
     visitorRead: {
       type: "object",
       additionalProperties: false,

@@ -2,15 +2,16 @@
 
 Your landing page has five seconds. Let’s see what survived.
 
-Roast & Rescue is a playful landing-page clarity test for founders and indie developers. Upload a screenshot, describe what you intended to communicate, and receive a funny but constructive five-second diagnosis, an intention-gap analysis, three priority fixes, and rewritten hero copy.
+Roast & Rescue is a playful landing-page clarity test for founders and indie developers. Upload a screenshot, describe what you intended to communicate, and face three animated judges: a distracted visitor, a copy gremlin, and a click detective. Their verdict becomes a funny diagnosis, a three-point rescue plan, a concrete before/after example, and rewritten hero copy.
 
 ## Core journey
 
 1. Upload or paste a landing-page screenshot.
 2. Describe the product, audience, and desired visitor action.
 3. Choose Gentle, Spicy, or Brutal.
-4. Review the blind visitor read and intention gap.
-5. Copy the rescued headline, subheading, and CTA.
+4. Hear three distinct judge opinions and their shared verdict.
+5. Review the before/after example, blind read, and intention gap.
+6. Copy the rescued headline, subheading, and CTA.
 
 The built-in sample works without an API key, so the product remains demoable if connectivity or credentials fail.
 
@@ -41,13 +42,13 @@ The API key is only read by the server route and must never be exposed through a
 - Next.js and TypeScript
 - OpenAI Responses API with image input
 - Structured Outputs for predictable report rendering
-- Three.js via React Three Fiber for the hero ribbon
+- Three.js via React Three Fiber for the interactive hero and animated judge panel
 - Client-side screenshot resizing before upload
 - No database, accounts, URL scraping, or intentional image storage
 
 ## How Codex helped
 
-Codex helped reduce the hackathon idea to one complete journey, translated the design reference into reusable CSS tokens, implemented the image-input and structured-output API route, added a no-key demo fallback, and tested the responsive interface.
+Codex helped reduce the hackathon idea to one complete journey, translated the design reference into reusable CSS tokens, built the Three.js characters and judge animation, extended the image-input response into three reliable critique lenses, added a no-key demo fallback, and tested the responsive interface.
 
 ## Safety and privacy
 
