@@ -5,7 +5,6 @@ import Image from "next/image";
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Intensity, RoastReport } from "@/lib/report";
 import { LogoMark } from "@/components/LogoMark";
-import { buildAuditImage, buildAuditPdf } from "@/lib/audit-export";
 
 const JudgeScene = dynamic(
   () => import("@/components/JudgeScene").then((module) => module.JudgeScene),
@@ -16,12 +15,6 @@ type Intent = {
   product: string;
   audience: string;
   action: string;
-};
-
-type ExportedAudit = {
-  format: "image" | "pdf";
-  filename: string;
-  url: string;
 };
 
 const DEMO_INTENT: Intent = {
@@ -181,7 +174,6 @@ export default function Home() {
   const labRef = useRef<HTMLElement>(null);
   const loadingRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLElement>(null);
-  const exportUrlRef = useRef<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
@@ -196,9 +188,6 @@ export default function Home() {
   const [rescueImage, setRescueImage] = useState<string | null>(null);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [imageGenerationError, setImageGenerationError] = useState("");
-  const [exportingAudit, setExportingAudit] = useState<"" | "image" | "pdf">("");
-  const [auditExportError, setAuditExportError] = useState("");
-  const [exportedAudit, setExportedAudit] = useState<ExportedAudit | null>(null);
 
   const canSubmit = Boolean(image && intent.product && intent.audience && intent.action);
   const rewriteCopy = useMemo(() => {
@@ -227,24 +216,12 @@ export default function Home() {
     return () => cancelAnimationFrame(frame);
   }, [loading]);
 
-  useEffect(() => () => {
-    if (exportUrlRef.current) URL.revokeObjectURL(exportUrlRef.current);
-  }, []);
-
-  function clearExportedAudit() {
-    if (exportUrlRef.current) URL.revokeObjectURL(exportUrlRef.current);
-    exportUrlRef.current = null;
-    setExportedAudit(null);
-    setAuditExportError("");
-  }
-
   async function prepareFile(file: File) {
     setError("");
     setCaptureError("");
     setReport(null);
     setRescueImage(null);
     setImageGenerationError("");
-    clearExportedAudit();
     try {
       setImage(await compressImage(file));
       setFileName(file.name || "Pasted screenshot");
@@ -278,7 +255,6 @@ export default function Home() {
     setReport(null);
     setRescueImage(null);
     setImageGenerationError("");
-    clearExportedAudit();
     try {
       const response = await fetch("/api/screenshot", {
         method: "POST",
@@ -308,7 +284,6 @@ export default function Home() {
     setLoading(true);
     setError("");
     setReport(null);
-    clearExportedAudit();
     const activeIntent = demo ? DEMO_INTENT : intent;
     if (demo) {
       setIntent(DEMO_INTENT);
@@ -373,35 +348,6 @@ export default function Home() {
     }
   }
 
-  async function exportAudit(format: "image" | "pdf") {
-    if (!report || exportingAudit) return;
-    setExportingAudit(format);
-    setAuditExportError("");
-    try {
-      const blob = format === "image" ? await buildAuditImage(report) : await buildAuditPdf(report);
-      if (exportUrlRef.current) URL.revokeObjectURL(exportUrlRef.current);
-      const url = URL.createObjectURL(blob);
-      const filename = `roast-and-rescue-audit.${format === "image" ? "png" : "pdf"}`;
-      exportUrlRef.current = url;
-      setExportedAudit({ format, filename, url });
-
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = filename;
-      anchor.rel = "noopener";
-      anchor.hidden = true;
-      document.body.appendChild(anchor);
-      anchor.click();
-      window.setTimeout(() => anchor.remove(), 0);
-    } catch (cause) {
-      setAuditExportError(
-        cause instanceof Error ? cause.message : "This browser could not export the full audit.",
-      );
-    } finally {
-      setExportingAudit("");
-    }
-  }
-
   async function generateRescueImage() {
     if (!report || !image || generatingImage) return;
     setGeneratingImage(true);
@@ -443,8 +389,6 @@ export default function Home() {
     setCopied("");
     setRescueImage(null);
     setImageGenerationError("");
-    setExportingAudit("");
-    clearExportedAudit();
     if (fileInput.current) fileInput.current.value = "";
     requestAnimationFrame(() => labRef.current?.scrollIntoView({ behavior: "smooth" }));
   }
@@ -712,34 +656,12 @@ export default function Home() {
                   <strong>Take the full audit with you</strong>
                   <span>Both formats include every judge, priority, score and rewritten hero.</span>
                 </div>
-                <div className="audit-download-buttons">
-                  <button
-                    type="button"
-                    disabled={Boolean(exportingAudit)}
-                    onClick={() => void exportAudit("image")}
-                  >
-                    {exportingAudit === "image" ? "Building PNG…" : "Create PNG"}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={Boolean(exportingAudit)}
-                    onClick={() => void exportAudit("pdf")}
-                  >
-                    {exportingAudit === "pdf" ? "Building PDF…" : "Create PDF"}
-                  </button>
-                </div>
+                <form className="audit-download-buttons" action="/api/export" method="post" target="_blank">
+                  <input type="hidden" name="report" value={JSON.stringify(report)} />
+                  <button type="submit" name="format" value="png">Download PNG</button>
+                  <button type="submit" name="format" value="pdf">Download PDF</button>
+                </form>
               </div>
-              {exportedAudit && (
-                <div className="export-ready" role="status">
-                  <div>
-                    <strong>{exportedAudit.format === "pdf" ? "PDF" : "PNG"} ready</strong>
-                    <span>If the automatic save was blocked, use one of these direct links.</span>
-                  </div>
-                  <a href={exportedAudit.url} download={exportedAudit.filename}>Save file ↓</a>
-                  <a href={exportedAudit.url} target="_blank" rel="noopener noreferrer">Open preview ↗</a>
-                </div>
-              )}
-              {auditExportError && <p className="export-error" role="alert">{auditExportError}</p>}
             </div>
           </div>
 

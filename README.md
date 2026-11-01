@@ -63,7 +63,7 @@ All three API routes use the Node.js runtime. The AI routes have a 300-second ce
 - Original interactive SVG judge cast with lightweight CSS character animation
 - Client-side screenshot resizing before upload
 - Vercel-compatible Puppeteer capture for public website URLs
-- Native share-sheet support, a locally rendered 1200×630 verdict card, and complete PNG/PDF audit exports
+- Native share-sheet support, a locally rendered 1200×630 verdict card, and server-generated PNG/PDF audit downloads
 - No database, accounts, login capture, or intentional image storage
 
 ## How Codex helped

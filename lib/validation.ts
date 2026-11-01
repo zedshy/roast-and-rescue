@@ -43,6 +43,49 @@ export const rescueImageRequestSchema = z
   })
   .strict();
 
+const judgeSchema = z.object({
+  name: safeText("Judge name", 120),
+  lens: safeText("Judge lens", 120),
+  opinion: safeText("Judge opinion", 800),
+  verdict: safeText("Judge verdict", 300),
+}).strict();
+
+export const exportReportSchema = z.object({
+  roast: safeText("Roast", 800),
+  judges: z.array(judgeSchema).length(3),
+  consensus: z.array(safeText("Consensus point", 500)).length(3),
+  example: z.object({
+    before: safeText("Before example", 500),
+    after: safeText("After example", 500),
+    why: safeText("Example explanation", 800),
+  }).strict(),
+  visitorRead: z.object({
+    product: safeText("Visitor product read", 500),
+    audience: safeText("Visitor audience read", 500),
+    benefit: safeText("Visitor benefit read", 500),
+    action: safeText("Visitor action read", 500),
+    confusion: safeText("Visitor confusion", 800),
+  }).strict(),
+  intentGap: safeText("Intention gap", 1000),
+  keep: safeText("Keep recommendation", 800),
+  improvements: z.array(z.object({
+    title: safeText("Improvement title", 200),
+    detail: safeText("Improvement detail", 800),
+  }).strict()).length(3),
+  rewrite: z.object({
+    eyebrow: safeText("Eyebrow", 200),
+    headline: safeText("Headline", 400),
+    subheading: safeText("Subheading", 800),
+    cta: safeText("CTA", 160),
+  }).strict(),
+  scores: z.object({
+    clarity: z.number().int().min(1).max(5),
+    specificity: z.number().int().min(1).max(5),
+    hierarchy: z.number().int().min(1).max(5),
+    action: z.number().int().min(1).max(5),
+  }).strict(),
+}).strict();
+
 export function firstValidationError(error: z.ZodError) {
   return error.issues[0]?.message || "Please check the submitted details.";
 }
