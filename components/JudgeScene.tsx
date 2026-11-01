@@ -1,10 +1,10 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float, RoundedBox } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from "three";
-import { RoastMascot } from "./RoastMascot";
+import { JudgeCharacter } from "./JudgeCharacter";
 
 function Gavel() {
   const group = useRef<THREE.Group>(null);
@@ -40,13 +40,13 @@ function MagnifyingGlass() {
   );
 }
 
-function JudgeBench() {
+function JudgeBench({ compact }: { compact: boolean }) {
   return (
     <group position={[0, -1.45, -0.1]}>
-      <RoundedBox args={[7.1, 0.54, 0.75]} radius={0.16}>
+      <RoundedBox args={[compact ? 6.15 : 7.1, 0.54, 0.75]} radius={0.16}>
         <meshStandardMaterial color="#050505" roughness={0.55} />
       </RoundedBox>
-      {[-2.25, 0, 2.25].map((x, index) => (
+      {(compact ? [-1.85, 0, 1.85] : [-2.25, 0, 2.25]).map((x, index) => (
         <mesh key={x} position={[x, 0.31, 0.42]}>
           <cylinderGeometry args={[0.28, 0.28, 0.09, 32]} />
           <meshPhysicalMaterial
@@ -60,6 +60,28 @@ function JudgeBench() {
   );
 }
 
+function JudgeLineup() {
+  const { size } = useThree();
+  const compact = size.width < 600;
+  const positions = compact ? [-1.85, 0, 1.85] : [-2.3, 0, 2.3];
+  const scales = compact ? [0.61, 0.66, 0.61] : [0.72, 0.78, 0.72];
+
+  return (
+    <>
+      <Float speed={1.25} floatIntensity={0.18} rotationIntensity={0.03}>
+        <JudgeCharacter kind="visitor" position={[positions[0], 0.02, 0.25]} scale={scales[0]} />
+      </Float>
+      <Float speed={1.55} floatIntensity={0.24} rotationIntensity={0.04}>
+        <JudgeCharacter kind="gremlin" position={[positions[1], 0.12, 0.45]} scale={scales[1]} />
+      </Float>
+      <Float speed={1.1} floatIntensity={0.16} rotationIntensity={0.03}>
+        <JudgeCharacter kind="detective" position={[positions[2], 0.02, 0.25]} scale={scales[2]} />
+      </Float>
+      <JudgeBench compact={compact} />
+    </>
+  );
+}
+
 export function JudgeScene() {
   return (
     <div className="judge-scene" aria-hidden="true">
@@ -68,20 +90,15 @@ export function JudgeScene() {
         <directionalLight position={[4, 6, 6]} intensity={4.3} color="#ffffff" />
         <directionalLight position={[-4, -1, 4]} intensity={2.1} color="#dceeff" />
 
-        <Float speed={1.3} floatIntensity={0.22} rotationIntensity={0.06}>
-          <RoastMascot color="#fb4903" mood="suspicious" position={[-2.3, 0, 0.2]} scale={0.73} />
-        </Float>
-        <Float speed={1.6} floatIntensity={0.28} rotationIntensity={0.08}>
-          <RoastMascot color="#5c4ade" mood="suspicious" position={[0, 0.18, 0.45]} scale={0.78} />
-        </Float>
-        <Float speed={1.15} floatIntensity={0.2} rotationIntensity={0.06}>
-          <RoastMascot color="#55db9c" mood="delighted" position={[2.3, 0, 0.2]} scale={0.73} />
-        </Float>
-
-        <JudgeBench />
+        <JudgeLineup />
         <Gavel />
         <MagnifyingGlass />
       </Canvas>
+      <div className="judge-nameplates">
+        <span>The Visitor</span>
+        <span>Copy Gremlin</span>
+        <span>Click Detective</span>
+      </div>
       <div className="judge-scene-fallback">
         <span>ಠ_ಠ</span><span>¬‿¬</span><span>◉‿◉</span>
       </div>
