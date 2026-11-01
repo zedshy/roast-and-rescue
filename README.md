@@ -42,13 +42,14 @@ The API key is only read by the server route and must never be exposed through a
 - Next.js and TypeScript
 - OpenAI Responses API with image input
 - Structured Outputs for predictable report rendering
-- Three.js via React Three Fiber for the interactive hero and animated judge panel
+- Three.js via React Three Fiber for the interactive desktop hero
+- Original SVG judge cast with lightweight CSS character animation
 - Client-side screenshot resizing before upload
 - No database, accounts, URL scraping, or intentional image storage
 
 ## How Codex helped
 
-Codex helped reduce the hackathon idea to one complete journey, translated the design reference into reusable CSS tokens, built the Three.js characters and judge animation, extended the image-input response into three reliable critique lenses, added a no-key demo fallback, and tested the responsive interface.
+Codex helped reduce the hackathon idea to one complete journey, translated the design reference into reusable CSS tokens, built the original animated SVG judge cast, extended the image-input response into three reliable critique lenses, added a no-key demo fallback, and tested the responsive interface.
 
 ## Safety and privacy
 

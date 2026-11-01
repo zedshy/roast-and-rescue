@@ -349,6 +349,47 @@ nav {
 .judge-heading > p:last-child { margin: 0; color: #4d4d4d; font-size: 14px; }
 .judge-scene { position: relative; z-index: 2; width: min(900px, 100%); height: 390px; margin: 4px auto -26px; }
 .judge-scene canvas { position: relative; z-index: 2; }
+.judge-cast-svg { width: 100%; height: 100%; overflow: visible; }
+.judge-character, .judge-prop, .judge-eye, .judge-gavel {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+@keyframes character-bob {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-7px) rotate(-.8deg); }
+}
+@keyframes character-blink {
+  0%, 44%, 48%, 100% { transform: scaleY(1); }
+  46% { transform: scaleY(.08); }
+}
+@keyframes phone-check {
+  0%, 70%, 100% { transform: rotate(0); }
+  78%, 90% { transform: rotate(-8deg) translateY(-4px); }
+}
+@keyframes pencil-edit {
+  0%, 70%, 100% { transform: rotate(0); }
+  80% { transform: rotate(12deg); }
+  90% { transform: rotate(-8deg); }
+}
+@keyframes glass-scan {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  50% { transform: translateX(-12px) rotate(-5deg); }
+}
+@keyframes gavel-tap {
+  0%, 68%, 100% { transform: rotate(0); }
+  78% { transform: rotate(16deg); }
+  86% { transform: rotate(-4deg); }
+}
+.judge-character { animation: character-bob 3.2s ease-in-out infinite; }
+.judge-copy { animation-delay: -.9s; }
+.judge-detective { animation-delay: -1.8s; }
+.judge-eye { animation: character-blink 4.6s ease-in-out infinite; transform-origin: center; }
+.judge-copy .judge-eye { animation-delay: -1.2s; }
+.judge-detective .judge-eye { animation-delay: -2.4s; }
+.judge-phone { animation: phone-check 4s ease-in-out infinite; }
+.judge-pencil { animation: pencil-edit 3.4s ease-in-out infinite; }
+.judge-glass { animation: glass-scan 2.8s ease-in-out infinite; }
+.judge-gavel { animation: gavel-tap 3.6s cubic-bezier(.2,.8,.2,1) infinite; }
 .judge-nameplates {
   position: absolute;
   z-index: 4;

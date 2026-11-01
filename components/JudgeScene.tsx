@@ -1,106 +1,120 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Float, RoundedBox } from "@react-three/drei";
-import { useRef } from "react";
-import * as THREE from "three";
-import { JudgeCharacter } from "./JudgeCharacter";
+const ink = "#111111";
 
-function Gavel() {
-  const group = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    if (!group.current) return;
-    group.current.rotation.z = -0.42 + Math.sin(clock.elapsedTime * 1.8) * 0.1;
-  });
+function Visitor() {
   return (
-    <group ref={group} position={[0.55, -0.95, 1.2]} rotation={[0.1, 0, -0.42]}>
-      <mesh position={[0, -0.45, 0]}>
-        <capsuleGeometry args={[0.08, 0.85, 6, 12]} />
-        <meshPhysicalMaterial color="#050505" roughness={0.3} />
-      </mesh>
-      <RoundedBox args={[0.85, 0.34, 0.34]} radius={0.1} position={[0, 0.08, 0]}>
-        <meshPhysicalMaterial color="#ffd731" roughness={0.25} clearcoat={0.5} />
-      </RoundedBox>
-    </group>
+    <g className="judge-character judge-visitor">
+      <g className="judge-prop judge-phone">
+        <rect x="45" y="178" width="38" height="62" rx="8" fill="#242424" stroke={ink} strokeWidth="5" />
+        <circle cx="64" cy="228" r="3" fill="#dceeff" />
+      </g>
+      <path d="M100 183c-20 5-31 24-30 48" fill="none" stroke="#8d573e" strokeWidth="18" strokeLinecap="round" />
+      <circle cx="74" cy="228" r="13" fill="#8d573e" stroke={ink} strokeWidth="5" />
+      <rect x="92" y="165" width="126" height="104" rx="44" fill="#fb6b32" stroke={ink} strokeWidth="5" />
+      <path d="M118 177c12 18 58 18 72 0" fill="none" stroke="#ffd731" strokeWidth="10" strokeLinecap="round" />
+      <rect x="108" y="67" width="94" height="112" rx="38" fill="#8d573e" stroke={ink} strokeWidth="5" />
+      <circle cx="108" cy="124" r="12" fill="#8d573e" stroke={ink} strokeWidth="5" />
+      <circle cx="202" cy="124" r="12" fill="#8d573e" stroke={ink} strokeWidth="5" />
+      <path d="M111 84c11-28 72-31 87 4l-4 11h-83z" fill="#211916" />
+      <path d="M106 78c11-25 83-27 101 1v16H106z" fill="#ffd731" stroke={ink} strokeWidth="5" strokeLinejoin="round" />
+      <path d="M105 94h110" stroke={ink} strokeWidth="8" strokeLinecap="round" />
+      <ellipse className="judge-eye eye-one" cx="135" cy="122" rx="17" ry="20" fill="white" stroke={ink} strokeWidth="4" />
+      <ellipse className="judge-eye eye-two" cx="177" cy="122" rx="17" ry="20" fill="white" stroke={ink} strokeWidth="4" />
+      <circle cx="139" cy="126" r="7" fill={ink} />
+      <circle cx="181" cy="126" r="7" fill={ink} />
+      <path d="M151 133l-5 13h12" fill="none" stroke={ink} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M136 159c12-7 27-7 39 0" fill="none" stroke={ink} strokeWidth="5" strokeLinecap="round" />
+      <path d="M209 188c19 9 28 25 24 45" fill="none" stroke="#8d573e" strokeWidth="18" strokeLinecap="round" />
+      <circle cx="231" cy="235" r="13" fill="#8d573e" stroke={ink} strokeWidth="5" />
+    </g>
   );
 }
 
-function MagnifyingGlass() {
+function CopyGremlin() {
   return (
-    <group position={[2.85, -0.7, 1.1]} rotation={[0.2, -0.1, -0.5]}>
-      <mesh>
-        <torusGeometry args={[0.36, 0.09, 14, 36]} />
-        <meshPhysicalMaterial color="#050505" roughness={0.25} />
-      </mesh>
-      <mesh position={[0.42, -0.42, 0]} rotation={[0, 0, -0.78]}>
-        <capsuleGeometry args={[0.07, 0.65, 6, 12]} />
-        <meshPhysicalMaterial color="#050505" roughness={0.25} />
-      </mesh>
-    </group>
+    <g className="judge-character judge-copy">
+      <rect x="319" y="166" width="126" height="103" rx="36" fill="#7458ed" stroke={ink} strokeWidth="5" />
+      <path d="M334 190l48 43 47-43" fill="none" stroke="#e9ccff" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M327 92c-15-48 95-65 111 0l-9 73h-93z" fill="#392276" stroke={ink} strokeWidth="5" strokeLinejoin="round" />
+      <rect x="337" y="66" width="90" height="111" rx="39" fill="#efb38e" stroke={ink} strokeWidth="5" />
+      <path d="M336 99c12-38 31-48 53-48 26 0 44 18 48 51-15-5-28-16-34-30-14 20-36 29-67 27z" fill="#392276" />
+      <path d="M338 95c-12 23-12 55 1 76" fill="none" stroke="#392276" strokeWidth="15" strokeLinecap="round" />
+      <path d="M427 94c13 25 13 54 1 78" fill="none" stroke="#392276" strokeWidth="15" strokeLinecap="round" />
+      <ellipse className="judge-eye eye-one" cx="361" cy="123" rx="17" ry="20" fill="white" stroke={ink} strokeWidth="4" />
+      <ellipse className="judge-eye eye-two" cx="404" cy="123" rx="17" ry="20" fill="white" stroke={ink} strokeWidth="4" />
+      <circle cx="363" cy="125" r="7" fill={ink} />
+      <circle cx="406" cy="125" r="7" fill={ink} />
+      <circle cx="361" cy="123" r="24" fill="none" stroke={ink} strokeWidth="5" />
+      <circle cx="404" cy="123" r="24" fill="none" stroke={ink} strokeWidth="5" />
+      <path d="M385 122h-3" stroke={ink} strokeWidth="5" />
+      <path d="M376 139l-5 11h11" fill="none" stroke={ink} strokeWidth="4" strokeLinecap="round" />
+      <path d="M365 160c11 10 25 10 36 0" fill="none" stroke="#8e3f4a" strokeWidth="5" strokeLinecap="round" />
+      <path d="M321 192c-20 17-27 38-19 60" fill="none" stroke="#efb38e" strokeWidth="18" strokeLinecap="round" />
+      <circle cx="305" cy="250" r="13" fill="#efb38e" stroke={ink} strokeWidth="5" />
+      <g transform="rotate(13 457 188)">
+        <g className="judge-prop judge-pencil">
+          <rect x="452" y="144" width="12" height="88" rx="5" fill="#ffd731" stroke={ink} strokeWidth="4" />
+          <path d="M452 144h12l-6-16z" fill="#efb38e" stroke={ink} strokeWidth="4" strokeLinejoin="round" />
+          <rect x="452" y="220" width="12" height="14" rx="3" fill="#fb6b32" />
+        </g>
+      </g>
+    </g>
   );
 }
 
-function JudgeBench({ compact }: { compact: boolean }) {
+function Detective() {
   return (
-    <group position={[0, -1.45, -0.1]}>
-      <RoundedBox args={[compact ? 6.15 : 7.1, 0.54, 0.75]} radius={0.16}>
-        <meshStandardMaterial color="#050505" roughness={0.55} />
-      </RoundedBox>
-      {(compact ? [-1.85, 0, 1.85] : [-2.25, 0, 2.25]).map((x, index) => (
-        <mesh key={x} position={[x, 0.31, 0.42]}>
-          <cylinderGeometry args={[0.28, 0.28, 0.09, 32]} />
-          <meshPhysicalMaterial
-            color={["#fb4903", "#5c4ade", "#55db9c"][index]}
-            roughness={0.3}
-            clearcoat={0.5}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function JudgeLineup() {
-  const { size } = useThree();
-  const compact = size.width < 600;
-  const positions = compact ? [-1.85, 0, 1.85] : [-2.3, 0, 2.3];
-  const scales = compact ? [0.61, 0.66, 0.61] : [0.72, 0.78, 0.72];
-
-  return (
-    <>
-      <Float speed={1.25} floatIntensity={0.18} rotationIntensity={0.03}>
-        <JudgeCharacter kind="visitor" position={[positions[0], 0.02, 0.25]} scale={scales[0]} />
-      </Float>
-      <Float speed={1.55} floatIntensity={0.24} rotationIntensity={0.04}>
-        <JudgeCharacter kind="gremlin" position={[positions[1], 0.12, 0.45]} scale={scales[1]} />
-      </Float>
-      <Float speed={1.1} floatIntensity={0.16} rotationIntensity={0.03}>
-        <JudgeCharacter kind="detective" position={[positions[2], 0.02, 0.25]} scale={scales[2]} />
-      </Float>
-      <JudgeBench compact={compact} />
-    </>
+    <g className="judge-character judge-detective">
+      <rect x="548" y="164" width="130" height="105" rx="35" fill="#61dfa4" stroke={ink} strokeWidth="5" />
+      <path d="M564 177l47 61 49-61M611 177v65" fill="none" stroke="#f6f1df" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="567" y="65" width="93" height="113" rx="38" fill="#b96f50" stroke={ink} strokeWidth="5" />
+      <path d="M571 86c17-35 69-35 86 1v18c-15-14-29-24-44-25-15 10-26 16-42 19z" fill="#1d1714" />
+      <ellipse className="judge-eye eye-one" cx="592" cy="124" rx="17" ry="20" fill="white" stroke={ink} strokeWidth="4" />
+      <ellipse className="judge-eye eye-two" cx="635" cy="124" rx="17" ry="20" fill="white" stroke={ink} strokeWidth="4" />
+      <circle cx="594" cy="126" r="7" fill={ink} />
+      <circle cx="637" cy="126" r="7" fill={ink} />
+      <path d="M608 136l-5 12h11" fill="none" stroke={ink} strokeWidth="4" strokeLinecap="round" />
+      <path d="M589 157c14-9 30-9 45 0" fill="none" stroke="#1d1714" strokeWidth="9" strokeLinecap="round" />
+      <path d="M607 163c7 4 13 4 20 0" fill="none" stroke="#592f29" strokeWidth="4" strokeLinecap="round" />
+      <g transform="rotate(3 615 75)">
+        <path d="M559 75h112" stroke={ink} strokeWidth="13" strokeLinecap="round" />
+        <path d="M575 73l8-42h64l8 42z" fill="#25372f" stroke={ink} strokeWidth="5" strokeLinejoin="round" />
+        <path d="M581 59h68" stroke="#ffd731" strokeWidth="8" />
+      </g>
+      <path d="M669 190c20 15 27 34 20 57" fill="none" stroke="#b96f50" strokeWidth="18" strokeLinecap="round" />
+      <circle cx="685" cy="249" r="13" fill="#b96f50" stroke={ink} strokeWidth="5" />
+      <g className="judge-prop judge-glass">
+        <circle cx="704" cy="194" r="33" fill="#dceeff" fillOpacity=".65" stroke={ink} strokeWidth="8" />
+        <path d="M682 218l-29 31" stroke={ink} strokeWidth="10" strokeLinecap="round" />
+      </g>
+    </g>
   );
 }
 
 export function JudgeScene() {
   return (
     <div className="judge-scene" aria-hidden="true">
-      <Canvas camera={{ position: [0, 0, 7.5], fov: 42 }} dpr={[1, 1.5]}>
-        <ambientLight intensity={2.15} />
-        <directionalLight position={[4, 6, 6]} intensity={4.3} color="#ffffff" />
-        <directionalLight position={[-4, -1, 4]} intensity={2.1} color="#dceeff" />
-
-        <JudgeLineup />
-        <Gavel />
-        <MagnifyingGlass />
-      </Canvas>
+      <svg className="judge-cast-svg" viewBox="0 0 760 340" role="presentation">
+        <Visitor />
+        <CopyGremlin />
+        <Detective />
+        <rect x="26" y="258" width="708" height="48" rx="15" fill={ink} />
+        <rect x="26" y="258" width="708" height="9" rx="5" fill="#343434" />
+        <ellipse cx="155" cy="261" rx="24" ry="8" fill="#fb6b32" stroke={ink} strokeWidth="4" />
+        <ellipse cx="382" cy="261" rx="24" ry="8" fill="#7458ed" stroke={ink} strokeWidth="4" />
+        <ellipse cx="613" cy="261" rx="24" ry="8" fill="#61dfa4" stroke={ink} strokeWidth="4" />
+        <g transform="translate(442 262) rotate(-48)">
+          <g className="judge-gavel">
+            <rect x="-7" y="-5" width="14" height="92" rx="7" fill={ink} />
+            <rect x="-38" y="-19" width="76" height="32" rx="8" fill="#ffd731" stroke={ink} strokeWidth="5" />
+          </g>
+        </g>
+      </svg>
       <div className="judge-nameplates">
         <span>The Visitor</span>
         <span>Copy Gremlin</span>
         <span>Click Detective</span>
-      </div>
-      <div className="judge-scene-fallback">
-        <span>😴</span><span>🤓</span><span>🕵🏽</span>
       </div>
     </div>
   );
