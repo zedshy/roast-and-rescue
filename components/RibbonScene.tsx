@@ -4,6 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { RoastMascot } from "./RoastMascot";
 
 function Ribbon() {
   const group = useRef<THREE.Group>(null);
@@ -54,6 +55,30 @@ function Ribbon() {
   );
 }
 
+function HeroProps() {
+  const group = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (group.current) group.current.rotation.z = clock.elapsedTime * 0.08;
+  });
+
+  return (
+    <group ref={group}>
+      <mesh position={[-4.25, 1.75, 0.6]} rotation={[0.3, 0.4, 0.2]}>
+        <torusGeometry args={[0.38, 0.15, 16, 36]} />
+        <meshPhysicalMaterial color="#ffd731" roughness={0.28} clearcoat={0.6} />
+      </mesh>
+      <mesh position={[4.4, 1.45, 0]} rotation={[0.4, 0.2, 0.3]}>
+        <octahedronGeometry args={[0.46, 0]} />
+        <meshPhysicalMaterial color="#e9ccff" roughness={0.34} />
+      </mesh>
+      <mesh position={[-4.3, -1.65, 0.2]} rotation={[0.6, 0.3, 0.2]}>
+        <torusKnotGeometry args={[0.27, 0.1, 64, 10]} />
+        <meshPhysicalMaterial color="#5c4ade" roughness={0.3} clearcoat={0.45} />
+      </mesh>
+    </group>
+  );
+}
+
 export function RibbonScene() {
   return (
     <div className="ribbon-scene" aria-hidden="true">
@@ -62,6 +87,14 @@ export function RibbonScene() {
         <directionalLight position={[3, 5, 5]} intensity={4.2} color="#ffffff" />
         <directionalLight position={[-4, -2, 3]} intensity={2.6} color="#e9ccff" />
         <Ribbon />
+        <Float speed={1.45} rotationIntensity={0.08} floatIntensity={0.35}>
+          <RoastMascot
+            position={[2.7, -1.55, 1.5]}
+            rotation={[0, -0.3, 0.08]}
+            scale={0.5}
+          />
+        </Float>
+        <HeroProps />
       </Canvas>
       <div className="ribbon-fallback" />
     </div>

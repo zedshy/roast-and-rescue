@@ -9,6 +9,10 @@ const RibbonScene = dynamic(
   () => import("@/components/RibbonScene").then((module) => module.RibbonScene),
   { ssr: false },
 );
+const MascotScene = dynamic(
+  () => import("@/components/MascotScene").then((module) => module.MascotScene),
+  { ssr: false },
+);
 
 type Intent = {
   product: string;
@@ -189,12 +193,13 @@ export default function Home() {
         <RibbonScene />
         <div className="hero-sticker sticker-orange">HONEST</div>
         <div className="hero-sticker sticker-yellow">5 SEC</div>
+        <div className="speech-bubble">respectfully… what do you sell?</div>
         <div className="hero-copy">
           <p className="eyebrow">A FIVE-SECOND LANDING-PAGE TEST WITH TEETH</p>
           <h1>
-            ROAST
-            <span>&</span>
-            RESCUE
+            <span className="hero-word">ROAST</span>
+            <span className="hero-amp">&</span>
+            <span className="hero-word">RESCUE</span>
           </h1>
           <p className="hero-subtitle">
             Find out what visitors actually understand—then rescue your hero copy before they
@@ -203,6 +208,23 @@ export default function Home() {
           <a className="primary-button" href="#roast">
             Enter the roast lab <span aria-hidden="true">↓</span>
           </a>
+        </div>
+      </section>
+
+      <section className="meme-strip" aria-label="Common landing-page clarity problems">
+        <div className="meme-card founder-meme">
+          <span>FOUNDER</span>
+          <strong>“The value prop is obvious.”</strong>
+        </div>
+        <div className="meme-arrow" aria-hidden="true">→</div>
+        <div className="meme-card visitor-meme">
+          <span>VISITOR, 5 SECONDS LATER</span>
+          <strong>“So… is it blockchain?”</strong>
+        </div>
+        <div className="meme-card cta-meme">
+          <span>THE CTA</span>
+          <strong>LEARN MORE</strong>
+          <small>learn what, bestie?</small>
         </div>
       </section>
 
@@ -328,7 +350,12 @@ export default function Home() {
 
       {loading && (
         <section className="loading-section" aria-live="polite">
-          <div className="loading-orbit"><span>🔥</span></div>
+          <MascotScene mode="loading" />
+          <div className="loading-stickers" aria-hidden="true">
+            <span>LOOKING FOR NOUNS</span>
+            <span>SIDE-EYEING THE CTA</span>
+            <span>CHECKING IF “AI-POWERED” MEANS ANYTHING</span>
+          </div>
           <h2>Reading it like a distracted visitor…</h2>
           <p>Checking the promise, audience, hierarchy and next action.</p>
         </section>
@@ -337,6 +364,10 @@ export default function Home() {
       {report && (
         <section className="results-section" ref={resultsRef} aria-live="polite">
           <div className="result-banner">
+            <div className="result-memes" aria-hidden="true">
+              <span>IT’S GIVING: MYSTERY</span>
+              <span>THE HERO NEEDS A HERO</span>
+            </div>
             <p className="eyebrow">THE FIVE-SECOND VERDICT</p>
             <blockquote>“{report.roast}”</blockquote>
             <span className="roast-stamp">ROASTED</span>
@@ -377,6 +408,14 @@ export default function Home() {
               <h3>{report.intentGap}</h3>
             </div>
           </article>
+
+          <div className="rescue-mascot-band">
+            <MascotScene mode="rescue" />
+            <div>
+              <span className="eyebrow">THE CRITIC HAS LOGGED OFF</span>
+              <strong>Your hero survived character development.</strong>
+            </div>
+          </div>
 
           <div className="rescue-heading">
             <p className="eyebrow">NOW FOR THE USEFUL BIT</p>
