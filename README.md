@@ -8,7 +8,7 @@ Roast & Rescue is a playful landing-page clarity test for founders and indie dev
 
 ## Core journey
 
-1. Upload or paste a landing-page screenshot.
+1. Upload or paste a landing-page screenshot, or enter a public website URL for server-side capture.
 2. Describe the product, audience, and desired visitor action.
 3. Choose Gentle, Spicy, or Brutal.
 4. Hear three distinct judge opinions and their shared verdict.
@@ -49,9 +49,9 @@ The defaults are deliberately cost-conscious: `gpt-5.4-nano` handles screenshot 
 1. Click **Deploy with Vercel** above or import `zedshy/roast-and-rescue` in Vercel.
 2. Add `OPENAI_API_KEY` and a long random `SAFETY_IDENTIFIER_SALT` as **Secret** environment variables for Production and Preview.
 3. Leave the framework preset as Next.js and the build command as `npm run build`; no output-directory override is needed.
-4. Deploy, then open the generated URL in a private browser window and run both the built-in sample and one real screenshot.
+4. Deploy, then open the generated URL in a private browser window and test the sample, one uploaded screenshot, and one public URL.
 
-The two API routes use the Node.js runtime with a 300-second ceiling, which fits Vercel Hobby’s current maximum. Screenshots are compressed below Vercel’s 4.5 MB function payload cap, and generated concepts use compressed JPEG output for the same reason. Changing environment variables only affects a new deployment, so redeploy after editing them.
+All three API routes use the Node.js runtime. The AI routes have a 300-second ceiling and website capture has a 120-second ceiling, both within Vercel Hobby’s current maximum. Screenshots are compressed below Vercel’s 4.5 MB function payload cap, and generated concepts use compressed JPEG output for the same reason. Changing environment variables only affects a new deployment, so redeploy after editing them.
 
 ## Technical notes
 
@@ -62,8 +62,9 @@ The two API routes use the Node.js runtime with a 300-second ceiling, which fits
 - Three.js via React Three Fiber for supporting mascot moments
 - Original interactive SVG judge cast with lightweight CSS character animation
 - Client-side screenshot resizing before upload
+- Vercel-compatible Puppeteer capture for public website URLs
 - Native share-sheet support plus a locally rendered 1200×630 verdict card
-- No database, accounts, URL scraping, or intentional image storage
+- No database, accounts, login capture, or intentional image storage
 
 ## How Codex helped
 
@@ -75,6 +76,8 @@ Codex helped reduce the hackathon idea to one complete journey, translated the d
 - Roasts target the page, never the person who created it.
 - Scores are subjective clarity signals, not conversion predictions.
 - Requests are schema-validated and text plus screenshots are checked with `omni-moderation-latest`.
+- URL capture accepts public HTTP(S) pages only; credentials, local/private networks, unsafe redirects, non-web protocols, and private subresources are blocked.
+- Website capture is limited to five requests per ten minutes, uses a fresh browser context, and returns only a compressed viewport screenshot.
 - The API opts out of response storage and passes a one-way, salted safety identifier.
 - Basic per-instance rate limits allow 8 critiques and 3 generated concepts per 10 minutes.
 - Generated concepts are checked again before being returned.
@@ -90,6 +93,7 @@ Built during the DevDay Exchange Community Hackathon in London on 1 November 202
 - Visual direction inspired by the [Slush style reference on Refero](https://styles.refero.design/style/8b6b547f-a357-4f1b-9842-4579c62dd42b). No proprietary fonts or source assets were copied.
 - Display typography uses Anton; interface typography uses Inter through `next/font`.
 - Judge characters are original SVG illustrations generated in code for this project.
+- Server-side website screenshots use Puppeteer Core with `@sparticuz/chromium`, following Vercel’s Puppeteer deployment guidance.
 - OpenAI implementation follows the current official [API quickstart](https://developers.openai.com/api/docs/quickstart), [image-input guide](https://developers.openai.com/api/docs/guides/images-vision?api-mode=responses), [Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs), [image-generation tool guide](https://developers.openai.com/api/docs/guides/tools-image-generation), and [moderation guide](https://developers.openai.com/api/docs/guides/moderation).
 
 ## Submission checklist

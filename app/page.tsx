@@ -180,6 +180,9 @@ export default function Home() {
   const resultsRef = useRef<HTMLElement>(null);
   const [image, setImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [capturingWebsite, setCapturingWebsite] = useState(false);
+  const [captureError, setCaptureError] = useState("");
   const [intensity, setIntensity] = useState<Intensity>("spicy");
   const [intent, setIntent] = useState<Intent>({ product: "", audience: "", action: "" });
   const [report, setReport] = useState<RoastReport | null>(null);
@@ -219,12 +222,14 @@ export default function Home() {
 
   async function prepareFile(file: File) {
     setError("");
+    setCaptureError("");
     setReport(null);
     setRescueImage(null);
     setImageGenerationError("");
     try {
       setImage(await compressImage(file));
       setFileName(file.name || "Pasted screenshot");
+      setWebsiteUrl("");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not read that image.");
     }
@@ -245,6 +250,36 @@ export default function Home() {
     if (!fileInput.current) return;
     fileInput.current.value = "";
     fileInput.current.click();
+  }
+
+  async function captureWebsite() {
+    if (!websiteUrl.trim() || capturingWebsite) return;
+    setCapturingWebsite(true);
+    setCaptureError("");
+    setReport(null);
+    setRescueImage(null);
+    setImageGenerationError("");
+    try {
+      const response = await fetch("/api/screenshot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: websiteUrl }),
+      });
+      const payload = (await response.json()) as {
+        image?: string;
+        finalUrl?: string;
+        title?: string;
+        error?: string;
+      };
+      if (!response.ok || !payload.image) throw new Error(payload.error || "Website capture failed.");
+      setImage(payload.image);
+      setWebsiteUrl(payload.finalUrl || websiteUrl);
+      setFileName(payload.title ? `Website: ${payload.title}` : "Website screenshot");
+    } catch (cause) {
+      setCaptureError(cause instanceof Error ? cause.message : "We could not capture that website.");
+    } finally {
+      setCapturingWebsite(false);
+    }
   }
 
   async function analyse({ demo = false }: { demo?: boolean } = {}) {
@@ -366,6 +401,8 @@ export default function Home() {
   function startOver() {
     setImage(null);
     setFileName("");
+    setWebsiteUrl("");
+    setCaptureError("");
     setIntent({ product: "", audience: "", action: "" });
     setIntensity("spicy");
     setReport(null);
@@ -447,8 +484,8 @@ export default function Home() {
       <section className="lab-section" id="roast" ref={labRef}>
         <div className="section-heading">
           <p className="eyebrow">THE ROAST LAB</p>
-          <h2>Drop the screenshot.</h2>
-          <p>No URL scraping. No account. Your image is used for this analysis, not saved by us.</p>
+          <h2>Bring the landing page.</h2>
+          <p>Upload a screenshot or capture a public URL. No account, and no intentional image storage.</p>
         </div>
 
         <div className="lab-grid">
@@ -496,6 +533,35 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            <div className="capture-divider"><span>OR</span></div>
+            <form
+              className="url-capture"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void captureWebsite();
+              }}
+            >
+              <label htmlFor="website-url">Capture a public website</label>
+              <div>
+                <input
+                  id="website-url"
+                  type="text"
+                  inputMode="url"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  value={websiteUrl}
+                  onChange={(event) => setWebsiteUrl(event.target.value)}
+                  placeholder="yourwebsite.com"
+                  maxLength={2048}
+                />
+                <button type="submit" disabled={!websiteUrl.trim() || capturingWebsite || loading}>
+                  {capturingWebsite ? "Capturing…" : "Capture site"}
+                </button>
+              </div>
+              <small>Public pages only · desktop hero screenshot · no logins or private networks</small>
+              {captureError && <p className="capture-error" role="alert">{captureError}</p>}
+            </form>
 
             <button
               className="demo-button"

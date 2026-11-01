@@ -259,6 +259,17 @@ nav {
 }
 .image-actions { position: absolute; z-index: 4; left: 28px; right: 28px; bottom: 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px 10px 18px; border: var(--border); border-radius: 999px; background: var(--paper); font-size: 12px; font-weight: 700; }
 .image-actions span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.capture-divider { position: relative; height: 34px; display: grid; place-items: center; }
+.capture-divider::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 2px solid var(--carbon); opacity: .18; }
+.capture-divider span { position: relative; padding: 4px 10px; background: var(--paper); font-size: 9px; font-weight: 900; letter-spacing: .12em; }
+.url-capture { padding: 20px; border: var(--border); border-radius: 24px; background: var(--mint); }
+.url-capture > label { display: block; margin-bottom: 9px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
+.url-capture > div { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.url-capture input { min-width: 0; width: 100%; border: var(--border); border-radius: 999px; background: var(--paper); padding: 13px 16px; font: inherit; }
+.url-capture button { border: var(--border); border-radius: 999px; background: var(--carbon); color: var(--paper); padding: 12px 18px; font-weight: 900; cursor: pointer; }
+.url-capture button:disabled { opacity: .48; cursor: not-allowed; }
+.url-capture small { display: block; margin-top: 9px; font-size: 9px; font-weight: 700; line-height: 1.4; }
+.url-capture .capture-error { margin: 9px 0 0; color: #7e1700; font-size: 11px; font-weight: 900; line-height: 1.35; }
 .demo-button { width: 100%; border: 0; padding: 18px 8px 0; display: flex; justify-content: space-between; background: transparent; }
 .demo-button:disabled { opacity: .45; cursor: wait; }
 
@@ -704,6 +715,9 @@ footer a { font-weight: 800; }
   .dropzone { min-height: 330px; border-radius: 24px; }
   .dropzone img { padding: 22px; }
   .image-actions { left: 16px; right: 16px; bottom: 16px; }
+  .url-capture { padding: 16px; border-radius: 20px; }
+  .url-capture > div { grid-template-columns: 1fr; }
+  .url-capture button { width: 100%; }
   .controls-card { padding: 24px 18px; }
   .controls-card, .visitor-card, .score-card, .gap-card, .rewrite-card { border-radius: 24px; }
   .intensity-picker button { font-size: 11px; }
