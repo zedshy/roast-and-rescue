@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as RequestBody;
 
     if (body.demo) {
-      await new Promise((resolve) => setTimeout(resolve, 650));
+      await new Promise((resolve) => setTimeout(resolve, 1200));
       return NextResponse.json({ report: SAMPLE_REPORT, demo: true });
     }
 

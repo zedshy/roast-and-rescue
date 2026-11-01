@@ -2,7 +2,7 @@
 
 import { RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 type MascotProps = {
@@ -22,20 +22,30 @@ export function RoastMascot({
 }: MascotProps) {
   const group = useRef<THREE.Group>(null);
   const pupils = useRef<THREE.Group>(null);
+  const pointer = useRef({ x: 0, y: 0 });
 
-  useFrame(({ clock, pointer }, delta) => {
+  useEffect(() => {
+    const onPointerMove = (event: PointerEvent) => {
+      pointer.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.current.y = -((event.clientY / window.innerHeight) * 2 - 1);
+    };
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onPointerMove);
+  }, []);
+
+  useFrame(({ clock }, delta) => {
     if (group.current) {
       group.current.rotation.y = THREE.MathUtils.damp(
         group.current.rotation.y,
-        rotation[1] + pointer.x * 0.16,
+        rotation[1] + pointer.current.x * 0.16,
         3,
         delta,
       );
       group.current.rotation.z = rotation[2] + Math.sin(clock.elapsedTime * 1.35) * 0.025;
     }
     if (pupils.current) {
-      pupils.current.position.x = pointer.x * 0.06;
-      pupils.current.position.y = pointer.y * 0.04;
+      pupils.current.position.x = pointer.current.x * 0.06;
+      pupils.current.position.y = pointer.current.y * 0.04;
     }
   });
 

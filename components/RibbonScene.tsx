@@ -1,10 +1,103 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { RoastMascot } from "./RoastMascot";
+
+const GLYPHS: Record<string, string[]> = {
+  A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
+  C: ["01111", "10000", "10000", "10000", "10000", "10000", "01111"],
+  E: ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
+  O: ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
+  R: ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
+  S: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
+  T: ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
+  U: ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
+};
+
+function VoxelWord({ word, position }: { word: string; position: [number, number, number] }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  const cell = 0.145;
+  const letterStep = cell * 6.15;
+  const cubes = useMemo(() => {
+    const points: Array<[number, number, number]> = [];
+    const totalWidth = (word.length - 1) * letterStep + cell * 5;
+    for (let letterIndex = 0; letterIndex < word.length; letterIndex += 1) {
+      const glyph = GLYPHS[word[letterIndex]];
+      glyph.forEach((row, rowIndex) => {
+        row.split("").forEach((pixel, columnIndex) => {
+          if (pixel !== "1") return;
+          points.push([
+            -totalWidth / 2 + letterIndex * letterStep + columnIndex * cell,
+            (3 - rowIndex) * cell,
+            Math.sin((letterIndex * 7 + rowIndex + columnIndex) * 0.72) * 0.055,
+          ]);
+        });
+      });
+    }
+    return points;
+  }, [letterStep, word]);
+
+  useLayoutEffect(() => {
+    if (!mesh.current) return;
+    const matrix = new THREE.Matrix4();
+    cubes.forEach(([x, y, z], index) => {
+      matrix.makeTranslation(x, y, z);
+      mesh.current?.setMatrixAt(index, matrix);
+    });
+    mesh.current.instanceMatrix.needsUpdate = true;
+  }, [cubes]);
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, cubes.length]} position={position}>
+      <boxGeometry args={[cell * 1.06, cell * 1.06, cell * 1.35]} />
+      <meshPhysicalMaterial color="#050505" roughness={0.25} clearcoat={0.52} />
+    </instancedMesh>
+  );
+}
+
+function VoxelTitle() {
+  const group = useRef<THREE.Group>(null);
+  const pointer = useRef({ x: 0, y: 0 });
+  const { size } = useThree();
+
+  useEffect(() => {
+    const onPointerMove = (event: PointerEvent) => {
+      pointer.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.current.y = -((event.clientY / window.innerHeight) * 2 - 1);
+    };
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onPointerMove);
+  }, []);
+
+  useFrame(({ clock }, delta) => {
+    if (!group.current) return;
+    group.current.rotation.y = THREE.MathUtils.damp(
+      group.current.rotation.y,
+      pointer.current.x * 0.09,
+      3,
+      delta,
+    );
+    group.current.rotation.x = THREE.MathUtils.damp(
+      group.current.rotation.x,
+      -pointer.current.y * 0.035,
+      3,
+      delta,
+    );
+    group.current.position.y = Math.sin(clock.elapsedTime * 0.8) * 0.035;
+  });
+
+  if (size.width < 901) return null;
+
+  return (
+    <group ref={group} position={[-0.38, 0.42, 2]} scale={1.03}>
+      <VoxelWord word="ROAST" position={[0, 0.56, 0]} />
+      <VoxelWord word="RESCUE" position={[0, -0.56, 0]} />
+    </group>
+  );
+}
 
 function Ribbon() {
   const group = useRef<THREE.Group>(null);
@@ -87,11 +180,12 @@ export function RibbonScene() {
         <directionalLight position={[3, 5, 5]} intensity={4.2} color="#ffffff" />
         <directionalLight position={[-4, -2, 3]} intensity={2.6} color="#e9ccff" />
         <Ribbon />
+        <VoxelTitle />
         <Float speed={1.45} rotationIntensity={0.08} floatIntensity={0.35}>
           <RoastMascot
-            position={[2.7, -1.55, 1.5]}
+            position={[3.85, -1.65, 1.4]}
             rotation={[0, -0.3, 0.08]}
-            scale={0.5}
+            scale={0.48}
           />
         </Float>
         <HeroProps />

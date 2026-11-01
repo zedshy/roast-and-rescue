@@ -73,6 +73,8 @@ function Score({ label, value }: { label: string; value: number }) {
 
 export default function Home() {
   const fileInput = useRef<HTMLInputElement>(null);
+  const labRef = useRef<HTMLElement>(null);
+  const loadingRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLElement>(null);
   const [image, setImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
@@ -102,6 +104,14 @@ export default function Home() {
     return () => window.removeEventListener("paste", onPaste);
   }, []);
 
+  useEffect(() => {
+    if (!loading) return;
+    const frame = requestAnimationFrame(() => {
+      loadingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [loading]);
+
   async function prepareFile(file: File) {
     setError("");
     setReport(null);
@@ -124,7 +134,14 @@ export default function Home() {
     if (file) void prepareFile(file);
   }
 
+  function openFilePicker() {
+    if (!fileInput.current) return;
+    fileInput.current.value = "";
+    fileInput.current.click();
+  }
+
   async function analyse({ demo = false }: { demo?: boolean } = {}) {
+    if (loading) return;
     const runDemo = demo || image === "/sample-landing.svg";
     setLoading(true);
     setError("");
@@ -162,9 +179,25 @@ export default function Home() {
   }
 
   async function handleCopy(key: string, value: string) {
-    await copyText(value);
-    setCopied(key);
-    window.setTimeout(() => setCopied(""), 1400);
+    try {
+      await copyText(value);
+      setCopied(key);
+      window.setTimeout(() => setCopied(""), 1400);
+    } catch {
+      setError("Your browser blocked clipboard access. Select the text and copy it manually.");
+    }
+  }
+
+  function startOver() {
+    setImage(null);
+    setFileName("");
+    setIntent({ product: "", audience: "", action: "" });
+    setIntensity("spicy");
+    setReport(null);
+    setError("");
+    setCopied("");
+    if (fileInput.current) fileInput.current.value = "";
+    requestAnimationFrame(() => labRef.current?.scrollIntoView({ behavior: "smooth" }));
   }
 
   return (
@@ -196,10 +229,10 @@ export default function Home() {
         <div className="speech-bubble">respectfully… what do you sell?</div>
         <div className="hero-copy">
           <p className="eyebrow">A FIVE-SECOND LANDING-PAGE TEST WITH TEETH</p>
-          <h1>
-            <span className="hero-word">ROAST</span>
-            <span className="hero-amp">&</span>
-            <span className="hero-word">RESCUE</span>
+          <h1 aria-label="Roast and Rescue">
+            <span className="hero-word" aria-hidden="true">ROAST</span>
+            <span className="hero-amp" aria-hidden="true">&</span>
+            <span className="hero-word" aria-hidden="true">RESCUE</span>
           </h1>
           <p className="hero-subtitle">
             Find out what visitors actually understand—then rescue your hero copy before they
@@ -228,7 +261,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="lab-section" id="roast">
+      <section className="lab-section" id="roast" ref={labRef}>
         <div className="section-heading">
           <p className="eyebrow">THE ROAST LAB</p>
           <h2>Drop the screenshot.</h2>
@@ -241,15 +274,6 @@ export default function Home() {
               className={`dropzone ${image ? "has-image" : ""}`}
               onDragOver={(event) => event.preventDefault()}
               onDrop={onDrop}
-              onClick={() => !image && fileInput.current?.click()}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(event) => {
-                if ((event.key === "Enter" || event.key === " ") && !image) {
-                  fileInput.current?.click();
-                }
-              }}
-              aria-label="Upload a landing-page screenshot"
             >
               <input
                 ref={fileInput}
@@ -260,14 +284,20 @@ export default function Home() {
               />
               {image ? (
                 <>
-                  <Image src={image} alt="Landing-page screenshot preview" fill unoptimized />
+                  <Image
+                    src={image}
+                    alt="Landing-page screenshot preview"
+                    fill
+                    sizes="(max-width: 900px) 100vw, 58vw"
+                    unoptimized
+                  />
                   <div className="image-actions">
                     <span>{fileName}</span>
                     <button
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
-                        fileInput.current?.click();
+                        openFilePicker();
                       }}
                     >
                       Replace
@@ -279,13 +309,18 @@ export default function Home() {
                   <div className="upload-icon">↥</div>
                   <strong>Drop, paste or choose a screenshot</strong>
                   <span>PNG, JPEG or WebP · 12 MB max</span>
-                  <button type="button">Choose image</button>
+                  <button type="button" onClick={openFilePicker}>Choose image</button>
                 </div>
               )}
             </div>
 
-            <button className="demo-button" type="button" onClick={() => void analyse({ demo: true })}>
-              No screenshot? Run the 20-second sample <span>→</span>
+            <button
+              className="demo-button"
+              type="button"
+              onClick={() => void analyse({ demo: true })}
+              disabled={loading}
+            >
+              {image === "/sample-landing.svg" ? "Run the sample again" : "No screenshot? Run the sample"} <span>→</span>
             </button>
           </div>
 
@@ -324,6 +359,7 @@ export default function Home() {
                   type="button"
                   className={intensity === item.value ? "active" : ""}
                   onClick={() => setIntensity(item.value)}
+                  aria-pressed={intensity === item.value}
                 >
                   <span>{item.icon}</span>
                   {item.label}
@@ -343,13 +379,13 @@ export default function Home() {
             {!canSubmit && !loading && (
               <p className="form-hint">Add a screenshot and all three intentions to begin.</p>
             )}
-            {error && <p className="error-message">{error}</p>}
+            {error && <p className="error-message" role="alert">{error}</p>}
           </div>
         </div>
       </section>
 
       {loading && (
-        <section className="loading-section" aria-live="polite">
+        <section className="loading-section" ref={loadingRef} aria-live="polite" aria-busy="true">
           <MascotScene mode="loading" />
           <div className="loading-stickers" aria-hidden="true">
             <span>LOOKING FOR NOUNS</span>
@@ -370,6 +406,13 @@ export default function Home() {
             </div>
             <p className="eyebrow">THE FIVE-SECOND VERDICT</p>
             <blockquote>“{report.roast}”</blockquote>
+            <button
+              className="result-copy-button"
+              type="button"
+              onClick={() => void handleCopy("roast", report.roast)}
+            >
+              {copied === "roast" ? "Copied roast!" : "Copy the roast"}
+            </button>
             <span className="roast-stamp">ROASTED</span>
           </div>
 
@@ -455,8 +498,8 @@ export default function Home() {
             </div>
           </article>
 
-          <button className="start-over" type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            Roast another page ↑
+          <button className="start-over" type="button" onClick={startOver}>
+            Roast another page ↺
           </button>
         </section>
       )}
