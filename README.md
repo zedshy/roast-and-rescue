@@ -13,7 +13,7 @@ Roast & Rescue is a playful landing-page clarity test for founders and indie dev
 3. Choose Gentle, Spicy, or Brutal.
 4. Hear three distinct judge opinions and their shared verdict.
 5. Review the before/after example, blind read, and intention gap.
-6. Share or download the panel verdict as a social card.
+6. Share the verdict as a social card, or download the complete audit as a PNG or PDF.
 7. Copy the rescued hero, or generate one illustrative visual direction from the critique.
 
 The built-in sample works without an API key, so the product remains demoable if connectivity or credentials fail.
@@ -63,7 +63,7 @@ All three API routes use the Node.js runtime. The AI routes have a 300-second ce
 - Original interactive SVG judge cast with lightweight CSS character animation
 - Client-side screenshot resizing before upload
 - Vercel-compatible Puppeteer capture for public website URLs
-- Native share-sheet support plus a locally rendered 1200×630 verdict card
+- Native share-sheet support, a locally rendered 1200×630 verdict card, and complete PNG/PDF audit exports
 - No database, accounts, login capture, or intentional image storage
 
 ## How Codex helped

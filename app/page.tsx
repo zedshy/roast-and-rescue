@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Intensity, RoastReport } from "@/lib/report";
 import { LogoMark } from "@/components/LogoMark";
+import { downloadAuditImage, downloadAuditPdf } from "@/lib/audit-export";
 
 const MascotScene = dynamic(
   () => import("@/components/MascotScene").then((module) => module.MascotScene),
@@ -192,6 +193,8 @@ export default function Home() {
   const [rescueImage, setRescueImage] = useState<string | null>(null);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [imageGenerationError, setImageGenerationError] = useState("");
+  const [exportingAudit, setExportingAudit] = useState<"" | "image" | "pdf">("");
+  const [auditExportError, setAuditExportError] = useState("");
 
   const canSubmit = Boolean(image && intent.product && intent.audience && intent.action);
   const rewriteCopy = useMemo(() => {
@@ -369,6 +372,22 @@ export default function Home() {
     }
   }
 
+  async function exportAudit(format: "image" | "pdf") {
+    if (!report || exportingAudit) return;
+    setExportingAudit(format);
+    setAuditExportError("");
+    try {
+      if (format === "image") await downloadAuditImage(report);
+      else await downloadAuditPdf(report);
+    } catch (cause) {
+      setAuditExportError(
+        cause instanceof Error ? cause.message : "This browser could not export the full audit.",
+      );
+    } finally {
+      setExportingAudit("");
+    }
+  }
+
   async function generateRescueImage() {
     if (!report || !image || generatingImage) return;
     setGeneratingImage(true);
@@ -410,6 +429,8 @@ export default function Home() {
     setCopied("");
     setRescueImage(null);
     setImageGenerationError("");
+    setExportingAudit("");
+    setAuditExportError("");
     if (fileInput.current) fileInput.current.value = "";
     requestAnimationFrame(() => labRef.current?.scrollIntoView({ behavior: "smooth" }));
   }
@@ -669,7 +690,22 @@ export default function Home() {
               <button type="button" onClick={() => void downloadShareCard()}>
                 {copied === "card" ? "Card saved!" : "Save share card ↓"}
               </button>
+              <button
+                type="button"
+                disabled={Boolean(exportingAudit)}
+                onClick={() => void exportAudit("image")}
+              >
+                {exportingAudit === "image" ? "Building image…" : "Full audit PNG ↓"}
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(exportingAudit)}
+                onClick={() => void exportAudit("pdf")}
+              >
+                {exportingAudit === "pdf" ? "Building PDF…" : "Full audit PDF ↓"}
+              </button>
             </div>
+            {auditExportError && <p className="export-error" role="alert">{auditExportError}</p>}
             <span className="roast-stamp">ROASTED</span>
           </div>
 
