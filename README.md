@@ -42,8 +42,8 @@ The API key is only read by the server route and must never be exposed through a
 - Next.js and TypeScript
 - OpenAI Responses API with image input
 - Structured Outputs for predictable report rendering
-- Three.js via React Three Fiber for the interactive desktop hero
-- Original SVG judge cast with lightweight CSS character animation
+- Three.js via React Three Fiber for supporting mascot moments
+- Original interactive SVG judge cast with lightweight CSS character animation
 - Client-side screenshot resizing before upload
 - No database, accounts, URL scraping, or intentional image storage
 
@@ -65,7 +65,7 @@ Built during the DevDay Exchange Community Hackathon in London on 1 November 202
 
 - Visual direction inspired by the [Slush style reference on Refero](https://styles.refero.design/style/8b6b547f-a357-4f1b-9842-4579c62dd42b). No proprietary fonts or source assets were copied.
 - Display typography uses Anton; interface typography uses Inter through `next/font`.
-- 3D ribbon is generated in code with Three.js.
+- Judge characters are original SVG illustrations generated in code for this project.
 - OpenAI implementation follows the current official [API quickstart](https://developers.openai.com/api/docs/quickstart), [image-input guide](https://developers.openai.com/api/docs/guides/images-vision?api-mode=responses), and [Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs).
 
 ## Submission checklist

@@ -5,10 +5,6 @@ import Image from "next/image";
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Intensity, RoastReport } from "@/lib/report";
 
-const RibbonScene = dynamic(
-  () => import("@/components/RibbonScene").then((module) => module.RibbonScene),
-  { ssr: false },
-);
 const MascotScene = dynamic(
   () => import("@/components/MascotScene").then((module) => module.MascotScene),
   { ssr: false },
@@ -227,9 +223,8 @@ export default function Home() {
       </nav>
 
       <section className="hero" id="top">
-        <RibbonScene />
+        <JudgeScene interactive />
         <div className="hero-sticker sticker-yellow">5 SEC</div>
-        <div className="speech-bubble">respectfully… what do you sell?</div>
         <div className="hero-copy">
           <p className="eyebrow">A FIVE-SECOND LANDING-PAGE TEST WITH TEETH</p>
           <h1 aria-label="Roast and Rescue">

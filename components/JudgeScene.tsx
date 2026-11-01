@@ -1,10 +1,19 @@
 "use client";
 
-const ink = "#111111";
+import { useState } from "react";
 
-function Visitor() {
+const ink = "#111111";
+type JudgeKey = "visitor" | "copy" | "detective";
+
+const JUDGE_LINES: Record<JudgeKey, { label: string; line: string }> = {
+  visitor: { label: "First impression", line: "You have five seconds. Make the point." },
+  copy: { label: "Clarity", line: "Specific nouns, please. I am begging." },
+  detective: { label: "Next action", line: "Every click needs a clear motive." },
+};
+
+function Visitor({ onSelect }: { onSelect?: () => void }) {
   return (
-    <g className="judge-character judge-visitor">
+    <g className="judge-character judge-visitor" onClick={onSelect} onPointerEnter={onSelect} style={{ cursor: onSelect ? "pointer" : undefined }}>
       <g className="judge-prop judge-phone">
         <rect x="45" y="178" width="38" height="62" rx="8" fill="#242424" stroke={ink} strokeWidth="5" />
         <circle cx="64" cy="228" r="3" fill="#dceeff" />
@@ -31,9 +40,9 @@ function Visitor() {
   );
 }
 
-function CopyGremlin() {
+function CopyGremlin({ onSelect }: { onSelect?: () => void }) {
   return (
-    <g className="judge-character judge-copy">
+    <g className="judge-character judge-copy" onClick={onSelect} onPointerEnter={onSelect} style={{ cursor: onSelect ? "pointer" : undefined }}>
       <rect x="319" y="166" width="126" height="103" rx="36" fill="#7458ed" stroke={ink} strokeWidth="5" />
       <path d="M334 190l48 43 47-43" fill="none" stroke="#e9ccff" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M327 92c-15-48 95-65 111 0l-9 73h-93z" fill="#392276" stroke={ink} strokeWidth="5" strokeLinejoin="round" />
@@ -63,9 +72,9 @@ function CopyGremlin() {
   );
 }
 
-function Detective() {
+function Detective({ onSelect }: { onSelect?: () => void }) {
   return (
-    <g className="judge-character judge-detective">
+    <g className="judge-character judge-detective" onClick={onSelect} onPointerEnter={onSelect} style={{ cursor: onSelect ? "pointer" : undefined }}>
       <rect x="548" y="164" width="130" height="105" rx="35" fill="#61dfa4" stroke={ink} strokeWidth="5" />
       <path d="M564 177l47 61 49-61M611 177v65" fill="none" stroke="#f6f1df" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
       <rect x="567" y="65" width="93" height="113" rx="38" fill="#b96f50" stroke={ink} strokeWidth="5" />
@@ -92,13 +101,20 @@ function Detective() {
   );
 }
 
-export function JudgeScene() {
+export function JudgeScene({ interactive = false }: { interactive?: boolean }) {
+  const [active, setActive] = useState<JudgeKey>("visitor");
+  const activeLine = JUDGE_LINES[active];
+
   return (
-    <div className="judge-scene" aria-hidden="true">
+    <div
+      className={`judge-scene active-${active} ${interactive ? "is-interactive" : ""}`}
+      aria-hidden={interactive ? undefined : true}
+      aria-label={interactive ? "Meet the three landing-page judges" : undefined}
+    >
       <svg className="judge-cast-svg" viewBox="0 0 760 340" role="presentation">
-        <Visitor />
-        <CopyGremlin />
-        <Detective />
+        <Visitor onSelect={interactive ? () => setActive("visitor") : undefined} />
+        <CopyGremlin onSelect={interactive ? () => setActive("copy") : undefined} />
+        <Detective onSelect={interactive ? () => setActive("detective") : undefined} />
         <rect x="26" y="258" width="708" height="48" rx="15" fill={ink} />
         <rect x="26" y="258" width="708" height="9" rx="5" fill="#343434" />
         <ellipse cx="155" cy="261" rx="24" ry="8" fill="#fb6b32" stroke={ink} strokeWidth="4" />
@@ -111,10 +127,26 @@ export function JudgeScene() {
           </g>
         </g>
       </svg>
+      {interactive && (
+        <div className="judge-live-line" aria-live="polite">
+          <span>{activeLine.label}</span>
+          <strong>“{activeLine.line}”</strong>
+        </div>
+      )}
       <div className="judge-nameplates">
-        <span>The Visitor</span>
-        <span>Copy Gremlin</span>
-        <span>Click Detective</span>
+        {interactive ? (
+          <>
+            <button type="button" aria-pressed={active === "visitor"} onClick={() => setActive("visitor")} onMouseEnter={() => setActive("visitor")} onFocus={() => setActive("visitor")}>The Visitor</button>
+            <button type="button" aria-pressed={active === "copy"} onClick={() => setActive("copy")} onMouseEnter={() => setActive("copy")} onFocus={() => setActive("copy")}>Copy Gremlin</button>
+            <button type="button" aria-pressed={active === "detective"} onClick={() => setActive("detective")} onMouseEnter={() => setActive("detective")} onFocus={() => setActive("detective")}>Click Detective</button>
+          </>
+        ) : (
+          <>
+            <span>The Visitor</span>
+            <span>Copy Gremlin</span>
+            <span>Click Detective</span>
+          </>
+        )}
       </div>
     </div>
   );
